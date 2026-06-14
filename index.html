@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Khabrr — Stay in the Know</title>
+<meta name="description" content="Khabrr delivers the news you care about — summarised into crisp, swipeable cards in your language. Full-screen swipe feed, morning audio bulletins, no login. Stay in the Know." />
+<meta name="theme-color" content="#07080F" />
+
+<!-- Open Graph -->
+<meta property="og:title" content="Khabrr — Stay in the Know" />
+<meta property="og:description" content="Summarised news in your language. Swipe, listen, stay informed. No login." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://khabrr.in" />
+<meta property="og:image" content="https://khabrr.in/feature.png" />
+
+<link rel="icon" type="image/png" href="icon.png" />
+<link rel="apple-touch-icon" href="icon.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<style>
+:root{
+  --bg:#07080F;
+  --card:#0D0F1E;
+  --card-border:rgba(124,111,255,0.12);
+  --accent:#7C6FFF;
+  --accent-soft:#A89BFF;
+  --accent-glow:rgba(124,111,255,0.35);
+  --pop:#FF6B9D;
+  --text:#EEEEFF;
+  --muted:rgba(238,238,255,0.38);
+  --muted-mid:rgba(238,238,255,0.6);
+  --display:'Syne',sans-serif;
+  --body:'DM Sans',sans-serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- Aurora background ---------- */
+.aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;mix-blend-mode:screen}
+.blob.b1{width:620px;height:620px;background:radial-gradient(circle,#5B4FE0,transparent 70%);top:-180px;left:-120px;animation:drift1 18s ease-in-out infinite}
+.blob.b2{width:520px;height:520px;background:radial-gradient(circle,#7C6FFF,transparent 70%);top:10%;right:-160px;animation:drift2 22s ease-in-out infinite}
+.blob.b3{width:480px;height:480px;background:radial-gradient(circle,#FF6B9D,transparent 70%);bottom:-160px;left:30%;opacity:.30;animation:drift3 26s ease-in-out infinite}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,120px) scale(1.15)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-100px,80px) scale(1.1)}}
+@keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,-90px) scale(1.2)}}
+
+/* grain overlay */
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+.wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 24px}
+
+/* ---------- Logo ---------- */
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.5px}
+.logo .mark{position:relative;width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#5B4FE0,#7C6FFF);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px var(--accent-glow)}
+.logo .mark span{font-family:var(--display);font-weight:800;font-size:22px;color:#fff;line-height:1}
+.logo .mark::after{content:"";position:absolute;right:6px;bottom:6px;width:7px;height:7px;border-radius:50%;background:var(--pop)}
+.logo .dot{color:var(--accent)}
+
+/* ---------- Nav ---------- */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:.3s}
+nav .bar{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;max-width:1180px;margin:0 auto}
+nav.scrolled{background:rgba(7,8,15,.72);backdrop-filter:blur(18px);border-bottom:1px solid var(--card-border)}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{color:var(--muted-mid);text-decoration:none;font-size:15px;font-weight:500;transition:.2s}
+.nav-links a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--body);font-weight:700;font-size:15px;text-decoration:none;border-radius:14px;padding:11px 22px;cursor:pointer;border:none;transition:.25s}
+.btn-primary{background:linear-gradient(135deg,#5B4FE0,#7C6FFF);color:#fff;box-shadow:0 8px 24px var(--accent-glow)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--accent-glow)}
+.btn-ghost{background:rgba(124,111,255,.08);color:var(--text);border:1px solid var(--card-border)}
+.btn-ghost:hover{background:rgba(124,111,255,.16)}
+@media(max-width:780px){.nav-links{display:none}}
+
+/* ---------- Hero ---------- */
+.hero{padding:160px 0 80px;display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+@media(max-width:900px){.hero{grid-template-columns:1fr;text-align:center;padding-top:130px}}
+.pill{display:inline-flex;align-items:center;gap:8px;background:rgba(124,111,255,.1);border:1px solid var(--card-border);border-radius:100px;padding:7px 16px;font-size:13px;font-weight:500;color:var(--accent-soft);margin-bottom:26px}
+.pill .live{width:7px;height:7px;border-radius:50%;background:var(--pop);box-shadow:0 0 0 0 var(--pop);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,107,157,.6)}70%{box-shadow:0 0 0 8px rgba(255,107,157,0)}100%{box-shadow:0 0 0 0 rgba(255,107,157,0)}}
+.hero h1{font-family:var(--display);font-weight:800;font-size:clamp(42px,6vw,72px);line-height:1.02;letter-spacing:-2px;margin-bottom:24px}
+.hero h1 .grad{background:linear-gradient(120deg,#A89BFF 0%,#7C6FFF 40%,#FF6B9D 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p.sub{font-size:19px;color:var(--muted-mid);max-width:520px;margin-bottom:36px}
+@media(max-width:900px){.hero p.sub{margin-left:auto;margin-right:auto}}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap}
+@media(max-width:900px){.hero-cta{justify-content:center}}
+.store-badges{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
+@media(max-width:900px){.store-badges{justify-content:center}}
+.store{display:inline-flex;align-items:center;gap:10px;background:#000;border:1px solid var(--card-border);border-radius:13px;padding:9px 18px;text-decoration:none;color:#fff;transition:.25s}
+.store:hover{border-color:var(--accent);transform:translateY(-2px)}
+.store small{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.store strong{display:block;font-size:16px;font-weight:700;margin-top:-2px}
+.store svg{width:24px;height:24px;flex-shrink:0}
+
+/* trust row */
+.trust{display:flex;gap:34px;margin-top:44px;flex-wrap:wrap}
+@media(max-width:900px){.trust{justify-content:center}}
+.trust .item .n{font-family:var(--display);font-weight:800;font-size:30px;background:linear-gradient(120deg,#A89BFF,#7C6FFF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.trust .item .l{font-size:13px;color:var(--muted);margin-top:-2px}
+
+/* ---------- Phone mockup ---------- */
+.phone-wrap{display:flex;justify-content:center;position:relative}
+.phone-glow{position:absolute;width:340px;height:340px;background:radial-gradient(circle,var(--accent-glow),transparent 70%);filter:blur(40px);top:50%;left:50%;transform:translate(-50%,-50%);z-index:0}
+.phone{position:relative;z-index:2;width:300px;height:620px;background:#05060c;border-radius:44px;padding:12px;box-shadow:0 40px 80px rgba(0,0,0,.6),0 0 0 2px rgba(124,111,255,.18),inset 0 0 0 1px rgba(255,255,255,.04);animation:float 6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+.notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#05060c;border-radius:0 0 16px 16px;z-index:5}
+.screen{position:relative;width:100%;height:100%;border-radius:34px;overflow:hidden;background:var(--bg)}
+.feed{position:absolute;inset:0}
+.ncard{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;transition:opacity .7s ease, transform .7s ease;transform:translateY(20px)}
+.ncard.active{opacity:1;transform:translateY(0)}
+.ncard .img{height:44%;position:relative;overflow:hidden}
+.ncard .img img{width:100%;height:100%;object-fit:cover}
+.ncard .img::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(13,15,30,.9))}
+.ncard .cat{position:absolute;left:14px;bottom:14px;z-index:2;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:5px 11px;border-radius:8px;color:#fff}
+.ncard .body{flex:1;background:var(--card);padding:18px 16px;display:flex;flex-direction:column}
+.ncard .body h3{font-family:var(--body);font-weight:700;font-size:17px;line-height:1.3;margin-bottom:10px}
+.ncard .body p{font-size:12.5px;color:var(--muted-mid);line-height:1.5;flex:1}
+.ncard .meta{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:12px}
+/* progress dots */
+.dots{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:6;display:flex;flex-direction:column;gap:6px}
+.dots i{width:4px;height:14px;border-radius:3px;background:rgba(255,255,255,.18);transition:.4s}
+.dots i.on{background:var(--accent);height:22px}
+
+/* ---------- Section headers ---------- */
+section{padding:90px 0;position:relative;z-index:2}
+.eyebrow{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--accent-soft);text-align:center;margin-bottom:14px}
+.h2{font-family:var(--display);font-weight:800;font-size:clamp(32px,4.5vw,48px);letter-spacing:-1px;text-align:center;line-height:1.08}
+.h2 .grad{background:linear-gradient(120deg,#A89BFF,#FF6B9D);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.lead{text-align:center;color:var(--muted-mid);font-size:18px;max-width:620px;margin:18px auto 0}
+
+/* ---------- Language marquee ---------- */
+.marquee{overflow:hidden;padding:30px 0;mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.track{display:flex;gap:16px;width:max-content;animation:scroll 40s linear infinite}
+.track:hover{animation-play-state:paused}
+@keyframes scroll{to{transform:translateX(-50%)}}
+.lang-chip{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:118px;padding:18px 22px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;transition:.25s}
+.lang-chip:hover{border-color:var(--accent);transform:translateY(-4px)}
+.lang-chip .native{font-size:24px;font-weight:700;color:var(--text)}
+.lang-chip .en{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* ---------- Bento features ---------- */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;margin-top:54px}
+.bento .cell{background:var(--card);border:1px solid var(--card-border);border-radius:24px;padding:30px;position:relative;overflow:hidden;transition:.3s}
+.bento .cell:hover{border-color:rgba(124,111,255,.4);transform:translateY(-4px)}
+.bento .cell::before{content:"";position:absolute;width:200px;height:200px;background:radial-gradient(circle,var(--accent-glow),transparent 70%);top:-100px;right:-60px;opacity:0;transition:.4s}
+.bento .cell:hover::before{opacity:.6}
+.cell.span3{grid-column:span 3}
+.cell.span2{grid-column:span 2}
+.cell.span4{grid-column:span 4}
+@media(max-width:820px){.bento{grid-template-columns:1fr}.cell.span3,.cell.span2,.cell.span4{grid-column:span 1}}
+.ico{width:50px;height:50px;border-radius:14px;background:rgba(124,111,255,.12);display:flex;align-items:center;justify-content:center;margin-bottom:18px;position:relative;z-index:2}
+.ico svg{width:26px;height:26px;stroke:var(--accent-soft);fill:none;stroke-width:1.8}
+.cell h3{font-family:var(--display);font-weight:700;font-size:21px;margin-bottom:8px;position:relative;z-index:2}
+.cell p{color:var(--muted-mid);font-size:15px;position:relative;z-index:2}
+
+/* ---------- Steps ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:54px}
+@media(max-width:820px){.steps{grid-template-columns:1fr}}
+.step{text-align:center;padding:20px}
+.step .num{font-family:var(--display);font-weight:800;font-size:56px;background:linear-gradient(135deg,var(--accent),var(--pop));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.step h3{font-family:var(--display);font-weight:700;font-size:22px;margin:12px 0 8px}
+.step p{color:var(--muted-mid);font-size:15px}
+
+/* ---------- CTA ---------- */
+.cta-box{background:linear-gradient(135deg,rgba(91,79,224,.25),rgba(255,107,157,.12));border:1px solid var(--card-border);border-radius:32px;padding:64px 40px;margin-bottom:60px;text-align:center;position:relative;overflow:hidden}
+.cta-box::before{content:"";position:absolute;width:400px;height:400px;background:radial-gradient(circle,var(--accent-glow),transparent 70%);top:-200px;left:50%;transform:translateX(-50%);filter:blur(40px)}
+.cta-box h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,4vw,44px);letter-spacing:-1px;position:relative;z-index:2}
+.cta-box p{color:var(--muted-mid);font-size:18px;margin:14px auto 30px;max-width:480px;position:relative;z-index:2}
+.cta-box .store-badges{justify-content:center;position:relative;z-index:2}
+
+/* ---------- Footer ---------- */
+footer{border-top:1px solid var(--card-border);margin-top:80px;padding:110px 0 50px;position:relative;z-index:2}
+.foot{display:flex;justify-content:space-between;align-items:flex-start;gap:30px;flex-wrap:wrap}
+.foot .links{display:flex;gap:40px;flex-wrap:wrap}
+.foot .col h4{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px}
+.foot .col a{display:block;color:var(--muted-mid);text-decoration:none;font-size:15px;margin-bottom:10px;transition:.2s}
+.foot .col a:hover{color:var(--accent-soft)}
+.foot-bottom{margin-top:40px;padding-top:24px;border-top:1px solid var(--card-border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:14px}
+
+/* reveal animation */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="aurora">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+</div>
+<div class="grain"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="bar">
+    <div class="logo">
+      <div class="mark"><span>K</span></div>
+      khabrr<span class="dot">.</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#languages">Languages</a>
+      <a href="#how">How it works</a>
+      <a href="#get" class="btn btn-primary">Get the app</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="wrap hero">
+  <div class="reveal in">
+    <div class="pill"><span class="live"></span> Live news, in your language</div>
+    <h1>The news that matters,<br><span class="grad">short and to the point.</span></h1>
+    <p class="sub">Khabrr summarises today's top stories into crisp, swipeable cards — in your language. No login. No clutter. Just swipe and stay in the know.</p>
+    <div class="store-badges">
+      <a class="store" href="#get">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M17.05 12.04c-.02-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.14-2.76.83-3.48.83-.72 0-1.82-.81-3-.79-1.54.02-2.96.9-3.75 2.28-1.6 2.78-.41 6.89 1.15 9.14.76 1.1 1.67 2.34 2.86 2.29 1.15-.05 1.58-.74 2.97-.74 1.38 0 1.78.74 3 .72 1.24-.02 2.02-1.12 2.78-2.23.88-1.28 1.24-2.52 1.26-2.58-.03-.01-2.41-.92-2.43-3.66zM14.77 5.3c.64-.78 1.07-1.85.95-2.93-.92.04-2.04.61-2.7 1.39-.59.69-1.11 1.8-.97 2.85 1.03.08 2.08-.52 2.72-1.31z"/></svg>
+        <div><small>Download on the</small><strong>App Store</strong></div>
+      </a>
+      <a class="store" href="#get">
+        <svg viewBox="0 0 24 24"><path fill="#00D4FF" d="M3.6 2.4c-.3.3-.4.7-.4 1.3v16.6c0 .6.1 1 .4 1.3l.1.1L13 12.1v-.2L3.7 2.3z"/><path fill="#FFCE00" d="M16.2 15.3 13 12.1v-.2l3.2-3.2.1.1 3.8 2.2c1.1.6 1.1 1.6 0 2.2z"/><path fill="#FF3D3D" d="M16.3 15.2 13 12 3.6 21.6c.4.4 1 .4 1.7.1z"/><path fill="#00E676" d="M3.6 2.4 13 12l3.3-3.2L5.3 2.3c-.7-.4-1.3-.4-1.7.1z"/></svg>
+        <div><small>Get it on</small><strong>Google Play</strong></div>
+      </a>
+    </div>
+    <div class="trust">
+      <div class="item"><div class="n">Your</div><div class="l">Language</div></div>
+      <div class="item"><div class="n">Quick</div><div class="l">Summaries</div></div>
+      <div class="item"><div class="n">No</div><div class="l">Login needed</div></div>
+    </div>
+  </div>
+
+  <!-- Phone -->
+  <div class="phone-wrap reveal in">
+    <div class="phone-glow"></div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="feed" id="feed">
+          <!-- cards injected via JS -->
+        </div>
+        <div class="dots" id="dots"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- LANGUAGE MARQUEE -->
+<section style="padding:40px 0">
+  <div class="eyebrow reveal">Read in your mother tongue</div>
+  <div class="marquee">
+    <div class="track" id="track"></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="wrap">
+  <div class="eyebrow reveal">Why Khabrr</div>
+  <h2 class="h2 reveal">News, <span class="grad">reimagined</span> for the way you scroll</h2>
+  <div class="bento">
+    <div class="cell span3 reveal">
+      <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
+      <h3>Bite-sized summaries</h3>
+      <p>Every story distilled to its essence. Read the day's news in minutes, not hours — no fluff, no endless scrolling through filler paragraphs.</p>
+    </div>
+    <div class="cell span3 reveal">
+      <div class="ico"><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></svg></div>
+      <h3>Full-screen swipe feed</h3>
+      <p>One story per screen. Swipe up for the next, swipe right to read the full article. The most natural way to consume news on a phone.</p>
+    </div>
+    <div class="cell span2 reveal">
+      <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 1v22M5 8a4 4 0 0 1 0 8M19 8a4 4 0 0 1 0 8"/></svg></div>
+      <h3>Morning Bulletin</h3>
+      <p>Wake up to today's top stories read aloud — a hands-free audio briefing for your commute.</p>
+    </div>
+    <div class="cell span2 reveal">
+      <div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7M12 17h.01"/></svg></div>
+      <h3>Trivia & polls</h3>
+      <p>Test what you know with quizzes and hot-take polls tied to the real stories you just read.</p>
+    </div>
+    <div class="cell span2 reveal">
+      <div class="ico"><svg viewBox="0 0 24 24"><path d="M5 5v14l7-4 7 4V5z"/></svg></div>
+      <h3>Bookmark & read offline</h3>
+      <p>Save any story for later. Bookmarked articles stay readable even when you're offline.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="wrap">
+  <div class="eyebrow reveal">Up and running in seconds</div>
+  <h2 class="h2 reveal">No sign-up. <span class="grad">Just news.</span></h2>
+  <div class="steps">
+    <div class="step reveal">
+      <div class="num">1</div>
+      <h3>Pick your language</h3>
+      <p>Choose from many languages and the country you want news from.</p>
+    </div>
+    <div class="step reveal">
+      <div class="num">2</div>
+      <h3>Choose your topics</h3>
+      <p>Politics, tech, sports, business, entertainment — build a feed that's yours.</p>
+    </div>
+    <div class="step reveal">
+      <div class="num">3</div>
+      <h3>Start swiping</h3>
+      <p>Your personalised feed loads instantly. That's it — no account, ever.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LANGUAGES GRID -->
+<section id="languages" class="wrap">
+  <div class="eyebrow reveal">Many languages, one app</div>
+  <h2 class="h2 reveal">Speak the world's <span class="grad">languages</span></h2>
+  <p class="lead reveal">From Hindi to Japanese, Tamil to Arabic — Khabrr brings you the news in the language you think in.</p>
+  <div class="marquee" style="margin-top:40px">
+    <div class="track" id="track2" style="animation-duration:34s;animation-direction:reverse"></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="get" class="wrap">
+  <div class="cta-box reveal">
+    <h2>Stay in the Know.</h2>
+    <p>Join readers across the globe getting their news the smarter, faster, simpler way.</p>
+    <div class="store-badges">
+      <a class="store" href="#">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M17.05 12.04c-.02-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.14-2.76.83-3.48.83-.72 0-1.82-.81-3-.79-1.54.02-2.96.9-3.75 2.28-1.6 2.78-.41 6.89 1.15 9.14.76 1.1 1.67 2.34 2.86 2.29 1.15-.05 1.58-.74 2.97-.74 1.38 0 1.78.74 3 .72 1.24-.02 2.02-1.12 2.78-2.23.88-1.28 1.24-2.52 1.26-2.58-.03-.01-2.41-.92-2.43-3.66zM14.77 5.3c.64-.78 1.07-1.85.95-2.93-.92.04-2.04.61-2.7 1.39-.59.69-1.11 1.8-.97 2.85 1.03.08 2.08-.52 2.72-1.31z"/></svg>
+        <div><small>Download on the</small><strong>App Store</strong></div>
+      </a>
+      <a class="store" href="#">
+        <svg viewBox="0 0 24 24"><path fill="#00D4FF" d="M3.6 2.4c-.3.3-.4.7-.4 1.3v16.6c0 .6.1 1 .4 1.3l.1.1L13 12.1v-.2L3.7 2.3z"/><path fill="#FFCE00" d="M16.2 15.3 13 12.1v-.2l3.2-3.2.1.1 3.8 2.2c1.1.6 1.1 1.6 0 2.2z"/><path fill="#FF3D3D" d="M16.3 15.2 13 12 3.6 21.6c.4.4 1 .4 1.7.1z"/><path fill="#00E676" d="M3.6 2.4 13 12l3.3-3.2L5.3 2.3c-.7-.4-1.3-.4-1.7.1z"/></svg>
+        <div><small>Get it on</small><strong>Google Play</strong></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="wrap">
+  <div class="foot">
+    <div>
+      <div class="logo"><div class="mark"><span>K</span></div>khabrr<span class="dot">.</span></div>
+      <p style="color:var(--muted);font-size:14px;margin-top:14px;max-width:280px">Stay in the Know. Summarised news in your language.</p>
+    </div>
+    <div class="links">
+      <div class="col">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#languages">Languages</a>
+        <a href="#get">Download</a>
+      </div>
+      <div class="col">
+        <h4>Legal</h4>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="support.html">Support</a>
+      </div>
+      <div class="col">
+        <h4>Contact</h4>
+        <a href="mailto:hello@khabrr.in">hello@khabrr.in</a>
+      </div>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 Khabrr. All rights reserved.</span>
+    <span>Made in India with <span style="color:var(--pop)">♥</span></span>
+  </div>
+</footer>
+
+<script>
+// ---- Languages data ----
+const langs=[
+  {n:'हिन्दी',e:'Hindi'},{n:'English',e:'English'},{n:'मराठी',e:'Marathi'},
+  {n:'বাংলা',e:'Bengali'},{n:'தமிழ்',e:'Tamil'},{n:'తెలుగు',e:'Telugu'},
+  {n:'ગુજરાતી',e:'Gujarati'},{n:'ಕನ್ನಡ',e:'Kannada'},{n:'മലയാളം',e:'Malayalam'},
+  {n:'ਪੰਜਾਬੀ',e:'Punjabi'},{n:'اردو',e:'Urdu'},{n:'ଓଡ଼ିଆ',e:'Odia'},
+  {n:'العربية',e:'Arabic'},{n:'Deutsch',e:'German'},{n:'Français',e:'French'},
+  {n:'Español',e:'Spanish'},{n:'Português',e:'Portuguese'},{n:'中文',e:'Chinese'},
+  {n:'日本語',e:'Japanese'},{n:'한국어',e:'Korean'},{n:'Русский',e:'Russian'}
+];
+function fillTrack(id){
+  const t=document.getElementById(id);
+  const all=[...langs,...langs]; // duplicate for seamless loop
+  t.innerHTML=all.map(l=>`<div class="lang-chip"><div class="native">${l.n}</div><div class="en">${l.e}</div></div>`).join('');
+}
+fillTrack('track');fillTrack('track2');
+
+// ---- Phone feed mock ----
+const cards=[
+  {cat:'TECHNOLOGY',color:'#8b5cf6',img:'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=70',
+   t:'New chip promises to double phone battery life by 2027',
+   s:'A breakthrough in solid-state battery design could let smartphones run for two full days on a single charge, with manufacturers eyeing rollout in flagship devices.',
+   m:'THE VERGE · 2H AGO'},
+  {cat:'WORLD',color:'#6366f1',img:'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600&q=70',
+   t:'Global leaders reach landmark climate agreement at summit',
+   s:'Nearly 200 nations committed to tripling renewable energy capacity by 2030, marking the most ambitious climate pledge in over a decade of negotiations.',
+   m:'REUTERS · 4H AGO'},
+  {cat:'SPORTS',color:'#eab308',img:'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&q=70',
+   t:'Underdog squad stuns champions in last-minute thriller',
+   s:'A stoppage-time goal sealed a historic upset, sending fans into raptures as the title favourites crashed out of the tournament in dramatic fashion.',
+   m:'ESPN · 1H AGO'},
+  {cat:'BUSINESS',color:'#f97316',img:'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=70',
+   t:'Startup hits billion-dollar valuation in record 18 months',
+   s:'The fintech firm became the fastest company in its region to reach unicorn status, fuelled by surging demand for its instant-payment platform.',
+   m:'BLOOMBERG · 3H AGO'}
+];
+const feed=document.getElementById('feed');
+const dotsEl=document.getElementById('dots');
+feed.innerHTML=cards.map((c,i)=>`
+  <div class="ncard ${i===0?'active':''}" data-i="${i}">
+    <div class="img"><img src="${c.img}" alt=""><span class="cat" style="background:${c.color}">${c.cat}</span></div>
+    <div class="body"><h3>${c.t}</h3><p>${c.s}</p><div class="meta">${c.m}</div></div>
+  </div>`).join('');
+dotsEl.innerHTML=cards.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('');
+let idx=0;
+setInterval(()=>{
+  document.querySelectorAll('.ncard').forEach(n=>n.classList.remove('active'));
+  dotsEl.querySelectorAll('i').forEach(d=>d.classList.remove('on'));
+  idx=(idx+1)%cards.length;
+  document.querySelector(`.ncard[data-i="${idx}"]`).classList.add('active');
+  dotsEl.querySelectorAll('i')[idx].classList.add('on');
+},3200);
+
+// ---- Nav scroll ----
+const nav=document.getElementById('nav');
+addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>20));
+
+// ---- Reveal on scroll ----
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
