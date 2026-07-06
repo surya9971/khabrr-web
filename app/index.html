@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Get Khabrr — Stay in the Know</title>
+<meta name="theme-color" content="#07080F" />
+<meta name="description" content="Download Khabrr — summarised news in your language. Swipe, listen, stay informed. No login." />
+<!-- Open Graph (so this link previews nicely if shared) -->
+<meta property="og:title" content="Get Khabrr — Stay in the Know" />
+<meta property="og:description" content="Summarised news in your language. Swipe, listen, stay informed. No login." />
+<meta property="og:image" content="https://khabrr.in/feature.png" />
+<meta property="og:url" content="https://khabrr.in/app" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #07080F; color: #EEEEFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 24px; text-align: center; }
+  .logo { display: flex; align-items: center; gap: 14px; }
+  .tile { width: 68px; height: 68px; border-radius: 18px; background: linear-gradient(135deg, #5B4FE0, #7C6FFF);
+          display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 10px 30px rgba(124,111,255,.35); }
+  .tile span { font-size: 40px; font-weight: 800; color: #fff; line-height: 1; }
+  .tile i { position: absolute; right: 12px; bottom: 12px; width: 10px; height: 10px; border-radius: 50%; background: #FF6B9D; }
+  .word { font-size: 40px; font-weight: 800; letter-spacing: -1px; }
+  .word b { color: #FF6B9D; }
+  .tag { color: rgba(238,238,255,.55); font-size: 14px; letter-spacing: 2px; }
+  .opening { color: rgba(238,238,255,.45); font-size: 14px; margin-top: 4px; }
+  .stores { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; background: #0D0F1E; border: 1px solid rgba(124,111,255,.25);
+         color: #EEEEFF; text-decoration: none; padding: 13px 22px; border-radius: 14px; font-weight: 700; font-size: 15px; }
+  .btn:active { opacity: .7; }
+</style>
+</head>
+<body>
+  <div class="logo">
+    <div class="tile"><span>K</span><i></i></div>
+    <div class="word">khabrr<b>.</b></div>
+  </div>
+  <div class="tag">STAY IN THE KNOW</div>
+  <p class="opening" id="opening">Opening your app store…</p>
+  <div class="stores">
+    <a class="btn" id="ios"  href="https://apps.apple.com/in/app/khabrr/id6779893297">Download on the App Store</a>
+    <a class="btn" id="play" href="https://play.google.com/store/apps/details?id=com.khabrr.app">Get it on Google Play</a>
+  </div>
+<script>
+  var IOS  = 'https://apps.apple.com/in/app/khabrr/id6779893297';
+  var PLAY = 'https://play.google.com/store/apps/details?id=com.khabrr.app';
+  var ua = navigator.userAgent || navigator.vendor || '';
+  var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isAndroid = /android/i.test(ua);
+  if (isIOS || isAndroid) {
+    // auto-redirect mobile users straight to their store
+    setTimeout(function () { location.replace(isIOS ? IOS : PLAY); }, 400);
+  } else {
+    // desktop: no auto-redirect, just show both buttons
+    document.getElementById('opening').textContent = 'Download Khabrr:';
+  }
+</script>
+</body>
+</html>
