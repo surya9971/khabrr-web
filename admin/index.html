@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex, nofollow" />
-<title>Khabrr · Publish a story</title>
+<title>Khabrr · Admin</title>
 <style>
   :root{
     --bg:#07080F; --card:#0D0F1E; --card2:#12142a;
@@ -20,15 +20,16 @@
   .mark{width:44px;height:44px;border-radius:12px;position:relative;background:linear-gradient(135deg,#5B4FE0,#7C6FFF);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:24px;color:#fff;letter-spacing:-.04em}
   .mark::after{content:"";position:absolute;right:8px;bottom:8px;width:6px;height:6px;border-radius:50%;background:var(--pop)}
 
-  /* top bar */
-  .bar{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(7,8,15,.85);backdrop-filter:blur(8px);z-index:5}
+  .bar{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(7,8,15,.9);backdrop-filter:blur(8px);z-index:5}
   .bar h1{font-size:16px;margin:0;font-weight:750;letter-spacing:-.01em}
+  .tabs{display:flex;gap:4px;margin-left:14px}
+  .tabs button{background:none;border:none;color:var(--muted);font:inherit;font-size:13.5px;font-weight:650;padding:7px 14px;border-radius:8px;cursor:pointer}
+  .tabs button.on{background:var(--card2);color:var(--text)}
   .bar .who{margin-left:auto;font-size:12px;color:var(--muted);text-align:right}
   .bar button.out{background:none;border:1px solid var(--line2);color:var(--mid);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer}
   .bar button.out:hover{color:var(--text);border-color:var(--accent)}
   #timer{font-variant-numeric:tabular-nums;color:var(--soft)}
 
-  /* centered gates (loading / signin / denied) */
   .gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center}
   .gate h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em}
   .gate p{margin:0;color:var(--mid);max-width:44ch}
@@ -37,7 +38,7 @@
   .gbtn svg{width:18px;height:18px}
   .pwd{display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px}
 
-  /* workspace: form + preview */
+  /* publish */
   .work{display:grid;grid-template-columns:1fr;gap:0;max-width:1100px;margin:0 auto}
   @media(min-width:900px){.work{grid-template-columns:1fr 420px}}
   form{padding:24px 20px;display:flex;flex-direction:column;gap:16px}
@@ -55,33 +56,54 @@
   .msg{border-radius:9px;padding:11px 14px;font-size:13.5px;display:none}
   .msg.err{display:block;background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.3);color:#ffc9c9}
   .msg.ok{display:block;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#bff5cf}
-
-  /* preview panel = the app card */
   .preview{padding:24px 20px;border-left:1px solid var(--line)}
-  .preview .plabel{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:12px}
+  .plabel{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:12px}
   .phone{background:var(--card);border:1px solid var(--line2);border-radius:22px;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.5);max-width:300px;margin:0 auto}
   .pimg{position:relative;aspect-ratio:1/.86;background:#0a0b18 center/cover no-repeat;display:flex;align-items:flex-end}
   .pimg .ph{margin:auto;color:var(--muted);font-size:12px}
   .pcredit{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;font-size:9px;padding:3px 7px;border-radius:20px;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .pbadge{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.5);color:#fff;font-size:9px;font-weight:700;padding:4px 9px;border-radius:20px}
   .pbody{padding:16px 16px 18px}
   .ptitle{font-size:16px;font-weight:750;line-height:1.32;margin:0 0 8px}
   .psum{font-size:13px;color:var(--mid);line-height:1.55;margin:0 0 12px}
   .pmeta{font-size:10px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
   .pread{color:var(--soft);font-size:12px;font-weight:600;margin-top:10px}
-  .swipehint{margin-top:14px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:7px}
+
+  /* bulletins */
+  .breel{max-width:1000px;margin:0 auto;padding:22px 20px}
+  .brhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .brhead select{width:auto;min-width:180px}
+  .brhead button{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:10px 18px;font-weight:700;font-size:14px;cursor:pointer}
+  .brhead button:disabled{opacity:.5;cursor:not-allowed}
+  .blist{display:grid;grid-template-columns:1fr;gap:12px}
+  .bitem{display:grid;grid-template-columns:96px 1fr auto;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;align-items:center}
+  .bthumb{width:96px;height:96px;border-radius:9px;object-fit:cover;background:#0a0b18}
+  .binfo h3{margin:0 0 5px;font-size:15px;font-weight:700;line-height:1.3}
+  .binfo p{margin:0 0 6px;font-size:12.5px;color:var(--mid);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .bcred{font-size:10.5px;color:var(--muted)}
+  .bact{display:flex;flex-direction:column;gap:8px}
+  .bact button{border-radius:8px;padding:8px 12px;font-size:12.5px;font-weight:650;cursor:pointer;border:1px solid var(--line2);background:var(--card2);color:var(--text);white-space:nowrap}
+  .bact button.dl{background:var(--accent);border-color:var(--accent);color:#fff}
+  .bact button:disabled{opacity:.5;cursor:not-allowed}
+  .bempty{color:var(--muted);text-align:center;padding:40px;font-size:14px}
+
+  /* render overlay */
+  .rov{position:fixed;inset:0;background:rgba(7,8,15,.94);z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center}
+  .rov.on{display:flex}
+  .rov canvas{width:auto;height:min(70vh,560px);aspect-ratio:9/16;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid var(--line2)}
+  .rov .rstat{font-size:14px;color:var(--mid)}
+  .rov .rbar{width:min(300px,80vw);height:6px;background:var(--card2);border-radius:20px;overflow:hidden}
+  .rov .rfill{height:100%;width:0;background:var(--accent);transition:width .2s}
+  .rov .rclose{background:none;border:1px solid var(--line2);color:var(--mid);border-radius:8px;padding:8px 16px;cursor:pointer;font:inherit;font-size:13px}
   [hidden]{display:none!important}
 </style>
 </head>
 <body>
 
-<!-- loading -->
 <div id="loading" class="gate"><div class="mark">K</div><p>Loading…</p></div>
 
-<!-- sign in -->
 <div id="signin" class="gate" hidden>
   <div class="mark">K</div>
-  <h2>Publish a top story</h2>
+  <h2>Khabrr Admin</h2>
   <p>Sign in with the authorised Google account to continue.</p>
   <button class="gbtn" onclick="signIn()">
     <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/></svg>
@@ -89,40 +111,31 @@
   </button>
 </div>
 
-<!-- denied -->
-<div id="denied" class="gate" hidden>
-  <div class="mark">K</div>
-  <h2>Not authorised</h2>
-  <p id="deniedMsg">This account can't publish.</p>
-  <button class="gbtn" onclick="signOut()">Use a different account</button>
-</div>
-
-<!-- password (second factor, after Google) -->
 <div id="pwdgate" class="gate" hidden>
   <div class="mark">K</div>
   <h2>Publish password</h2>
-  <p>Signed in as <b id="pwdEmail"></b>. Enter the publish password.</p>
+  <p>Signed in as <b id="pwdEmail"></b>.</p>
   <div class="pwd">
-    <input id="pwdInput" type="password" placeholder="Password" autocomplete="off"
-           onkeydown="if(event.key==='Enter')unlock()" />
+    <input id="pwdInput" type="password" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')unlock()" />
     <button class="gbtn" style="justify-content:center" onclick="unlock()">Unlock</button>
     <div id="pwdErr" class="msg"></div>
   </div>
 </div>
 
-<!-- main app -->
 <div id="app" hidden>
   <div class="bar">
     <div class="mark" style="width:34px;height:34px;font-size:18px;border-radius:9px">K</div>
-    <h1>Publish a top story</h1>
-    <div class="who">
-      <span id="whoEmail"></span><br>
-      session ends in <span id="timer">30:00</span>
+    <h1>Khabrr Admin</h1>
+    <div class="tabs">
+      <button id="tab-pub" class="on" onclick="tab('pub')">✍️ Publish</button>
+      <button id="tab-reel" onclick="tab('reel')">🎙 Bulletin reels</button>
     </div>
+    <div class="who"><span id="whoEmail"></span><br>session ends in <span id="timer">30:00</span></div>
     <button class="out" onclick="signOut()">Sign out</button>
   </div>
 
-  <div class="work">
+  <!-- PUBLISH -->
+  <div id="view-pub" class="work">
     <form onsubmit="publish(event)">
       <div class="row">
         <label>Language
@@ -155,173 +168,304 @@
           </select>
         </label>
       </div>
-
       <label>Headline <span id="c_headline" class="count"></span>
-        <input id="f_headline" maxlength="140" placeholder="13–14 words, punchy, complete sentence"
-               oninput="render()" />
+        <input id="f_headline" maxlength="140" placeholder="13–14 words, punchy" oninput="render()" />
       </label>
-
       <label>Summary <span id="c_summary" class="count"></span>
-        <textarea id="f_summary" maxlength="900" placeholder="45–70 words of concrete facts. No filler."
-                  oninput="render()"></textarea>
+        <textarea id="f_summary" maxlength="900" placeholder="45–70 words of concrete facts." oninput="render()"></textarea>
       </label>
-
       <label>Image URL
-        <input id="f_image" placeholder="https://…  (leave blank → category fallback)" oninput="render()" />
-        <span class="hint">Must be https. This is the card's cover image.</span>
+        <input id="f_image" placeholder="https://…" oninput="render()" />
+        <span class="hint">Must be https. The card's cover image.</span>
       </label>
-
       <div class="row">
-        <label>Photo credit
-          <input id="f_credit" placeholder="e.g. Photo: Reuters" oninput="render()" />
-        </label>
-        <label>Source name
-          <input id="f_source" placeholder="Khabrr" oninput="render()" />
-        </label>
+        <label>Photo credit<input id="f_credit" placeholder="e.g. Photo: Reuters" oninput="render()" /></label>
+        <label>Source name<input id="f_source" placeholder="Khabrr" oninput="render()" /></label>
       </div>
-
-      <label>Read-more URL <span class="hint">— opens on swipe-right / “Read full article”</span>
-        <input id="f_readmore" placeholder="https://…  (leave blank → no read-more)" oninput="render()" />
+      <label>Read-more URL <span class="hint">— opens on swipe-right</span>
+        <input id="f_readmore" placeholder="https://…" oninput="render()" />
       </label>
-
       <div id="msg" class="msg"></div>
       <button type="submit" class="publish" id="pubBtn">Publish top story</button>
-      <span class="hint">Publishes instantly to everyone on this language + country. Auto-expires after 72 hours.</span>
+      <span class="hint">Publishes to everyone on this language + country. Auto-expires after 72 hours.</span>
     </form>
-
     <div class="preview">
-      <div class="plabel">Live preview — how the card will look</div>
+      <div class="plabel">Live preview</div>
       <div class="phone">
         <div class="pimg" id="pv_img"><span class="ph" id="pv_ph">no image</span>
           <span class="pcredit" id="pv_credit" hidden></span>
-          <span class="pbadge">🎙 Bulletin</span>
         </div>
         <div class="pbody">
           <p class="ptitle" id="pv_title">Your headline appears here</p>
-          <p class="psum" id="pv_sum">Your summary appears here — 45 to 70 words of concrete facts.</p>
+          <p class="psum" id="pv_sum">Your summary appears here.</p>
           <div class="pmeta" id="pv_meta">KHABRR · just now</div>
           <div class="pread" id="pv_read" hidden>Read full article →</div>
         </div>
       </div>
-      <div class="swipehint">→ swipe-right opens the read-more link</div>
     </div>
   </div>
+
+  <!-- BULLETIN REELS -->
+  <div id="view-reel" class="breel" hidden>
+    <div class="brhead">
+      <select id="r_lang">
+        <option value="hi">🎙 Hindi bulletin</option>
+        <option value="en">🎙 English (India) bulletin</option>
+        <option value="en_world">🌍 World bulletin</option>
+      </select>
+      <button id="r_load" onclick="loadBulletins()">Load bulletins</button>
+      <span class="hint" style="margin-left:auto">A reel records in real time (~song length). Keep this tab in front.</span>
+    </div>
+    <div id="blist" class="blist"></div>
+  </div>
+</div>
+
+<!-- render overlay -->
+<div id="rov" class="rov">
+  <canvas id="rcanvas" width="1080" height="1920"></canvas>
+  <div class="rstat" id="rstat">Preparing…</div>
+  <div class="rbar"><div class="rfill" id="rfill"></div></div>
+  <button class="rclose" id="rclose" onclick="cancelReel()">Cancel</button>
 </div>
 
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
   const SUPABASE_URL = 'https://kfbbpuujzqsqopghkpwg.supabase.co';
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtmYmJwdXVqenFzcW9wZ2hrcHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNzM5MjQsImV4cCI6MjA5MzY0OTkyNH0.KAK6Sr0DP-nBpkY9jJ-XeLfGQulHbvheUsr7hgl3ej4';
   const FN = SUPABASE_URL + '/functions/v1/admin-create-story';
-  const SESSION_MS = 30 * 60 * 1000;           // 30-minute session
-
+  const SESSION_MS = 30 * 60 * 1000;
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
   const $ = id => document.getElementById(id);
-  const show = id => { for (const g of ['loading','signin','denied','pwdgate','app']) $(g).hidden = (g !== id); };
+  const show = id => { for (const g of ['loading','signin','pwdgate','app']) $(g).hidden = (g !== id); };
 
   window.signIn  = () => sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href.split('#')[0] } });
   window.signOut = async () => { localStorage.removeItem('kh_signin_at'); localStorage.removeItem('kh_unlocked'); await sb.auth.signOut(); location.reload(); };
 
   let email = '';
-
   async function boot() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return show('signin');
-
-    // 30-min session: stamp on first sight, expire hard after.
     let signinAt = Number(localStorage.getItem('kh_signin_at'));
     if (!signinAt) { signinAt = Date.now(); localStorage.setItem('kh_signin_at', String(signinAt)); }
     if (Date.now() - signinAt > SESSION_MS) return window.signOut();
-
     email = (session.user.email || '').toLowerCase();
-    $('pwdEmail').textContent = email;
-    $('whoEmail').textContent = email;
-
-    // The email allowlist is enforced SERVER-SIDE by the edge function; the page can't hold it.
-    // We show the password gate to everyone signed in; a non-allowlisted email fails at publish.
-    if (localStorage.getItem('kh_unlocked') === '1') startApp(signinAt);
-    else show('pwdgate');
+    $('pwdEmail').textContent = email; $('whoEmail').textContent = email;
+    if (localStorage.getItem('kh_unlocked') === '1') startApp(signinAt); else show('pwdgate');
   }
-
   window.unlock = () => {
-    // The password is verified server-side on publish. Here we just gate the UI so it isn't blank.
     if (!$('pwdInput').value) { $('pwdErr').className = 'msg err'; $('pwdErr').textContent = 'Enter the password.'; return; }
-    window._pwd = $('pwdInput').value;
-    localStorage.setItem('kh_unlocked', '1');
+    window._pwd = $('pwdInput').value; localStorage.setItem('kh_unlocked', '1');
     startApp(Number(localStorage.getItem('kh_signin_at')));
   };
-
   let timerInt;
   function startApp(signinAt) {
-    show('app');
-    render();
+    show('app'); render();
     clearInterval(timerInt);
     timerInt = setInterval(() => {
       const left = SESSION_MS - (Date.now() - signinAt);
       if (left <= 0) return window.signOut();
-      const m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
+      const m = Math.floor(left/60000), s = Math.floor((left%60000)/1000);
       $('timer').textContent = `${m}:${String(s).padStart(2,'0')}`;
     }, 1000);
   }
+  window.tab = (t) => {
+    $('tab-pub').classList.toggle('on', t==='pub'); $('tab-reel').classList.toggle('on', t==='reel');
+    $('view-pub').hidden = t!=='pub'; $('view-reel').hidden = t!=='reel';
+  };
 
-  // live preview + counters
+  // ── publish (unchanged) ──
   window.render = () => {
-    const h = $('f_headline').value.trim(), s = $('f_summary').value.trim();
-    const img = $('f_image').value.trim(), cr = $('f_credit').value.trim();
-    const src = ($('f_source').value.trim() || 'Khabrr').toUpperCase();
-    const words = s ? s.split(/\s+/).length : 0;
-    $('c_headline').textContent = h ? `${h.split(/\s+/).length} words` : '';
-    $('c_summary').textContent = s ? `${words} words` : '';
-    $('c_summary').className = 'count' + (s && (words < 40 || words > 75) ? ' warn' : '');
-    $('pv_title').textContent = h || 'Your headline appears here';
-    $('pv_sum').textContent = s || 'Your summary appears here — 45 to 70 words of concrete facts.';
-    $('pv_meta').textContent = `${src} · just now`;
-    const pimg = $('pv_img');
-    if (img) { pimg.style.backgroundImage = `url("${img}")`; $('pv_ph').hidden = true; }
-    else { pimg.style.backgroundImage = 'none'; $('pv_ph').hidden = false; }
-    $('pv_credit').hidden = !cr; $('pv_credit').textContent = cr;
-    $('pv_read').hidden = !$('f_readmore').value.trim();
+    const h=$('f_headline').value.trim(), s=$('f_summary').value.trim(), img=$('f_image').value.trim(), cr=$('f_credit').value.trim();
+    const src=($('f_source').value.trim()||'Khabrr').toUpperCase(), words=s?s.split(/\s+/).length:0;
+    $('c_headline').textContent=h?`${h.split(/\s+/).length} words`:''; $('c_summary').textContent=s?`${words} words`:'';
+    $('c_summary').className='count'+(s&&(words<40||words>75)?' warn':'');
+    $('pv_title').textContent=h||'Your headline appears here'; $('pv_sum').textContent=s||'Your summary appears here.';
+    $('pv_meta').textContent=`${src} · just now`;
+    const pimg=$('pv_img'); if(img){pimg.style.backgroundImage=`url("${img}")`;$('pv_ph').hidden=true;}else{pimg.style.backgroundImage='none';$('pv_ph').hidden=false;}
+    $('pv_credit').hidden=!cr; $('pv_credit').textContent=cr; $('pv_read').hidden=!$('f_readmore').value.trim();
   };
-
   window.publish = async (e) => {
-    e.preventDefault();
-    const msg = $('msg'), btn = $('pubBtn');
-    msg.className = 'msg';
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) return window.signOut();
-
-    btn.disabled = true; btn.textContent = 'Publishing…';
+    e.preventDefault(); const msg=$('msg'), btn=$('pubBtn'); msg.className='msg';
+    const { data:{session} } = await sb.auth.getSession(); if(!session) return window.signOut();
+    btn.disabled=true; btn.textContent='Publishing…';
     try {
-      const res = await fetch(FN, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({
-          password:    window._pwd || '',
-          language:    $('f_language').value,
-          country:     $('f_country').value,
-          headline:    $('f_headline').value.trim(),
-          summary:     $('f_summary').value.trim(),
-          imageUrl:    $('f_image').value.trim(),
-          credit:      $('f_credit').value.trim(),
-          sourceName:  $('f_source').value.trim(),
-          readMoreUrl: $('f_readmore').value.trim(),
-        }),
-      });
+      const res = await fetch(FN,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
+        body: JSON.stringify({password:window._pwd||'',language:$('f_language').value,country:$('f_country').value,headline:$('f_headline').value.trim(),summary:$('f_summary').value.trim(),imageUrl:$('f_image').value.trim(),credit:$('f_credit').value.trim(),sourceName:$('f_source').value.trim(),readMoreUrl:$('f_readmore').value.trim()})});
       const out = await res.json();
-      if (!res.ok || out.error) { msg.className = 'msg err'; msg.textContent = out.error || `Failed (${res.status}).`; }
-      else {
-        msg.className = 'msg ok';
-        msg.textContent = `Published ✓ — live now on ${$('f_language').value}/${$('f_country').value}, expires in 72h.`;
-        for (const f of ['f_headline','f_summary','f_image','f_credit','f_readmore']) $(f).value = '';
-        render();
-      }
-    } catch (err) {
-      msg.className = 'msg err'; msg.textContent = 'Network error — check your connection and try again.';
-    } finally {
-      btn.disabled = false; btn.textContent = 'Publish top story';
-    }
+      if(!res.ok||out.error){msg.className='msg err';msg.textContent=out.error||`Failed (${res.status}).`;}
+      else{msg.className='msg ok';msg.textContent=`Published ✓ — live on ${$('f_language').value}/${$('f_country').value}, expires in 72h.`;for(const f of['f_headline','f_summary','f_image','f_credit','f_readmore'])$(f).value='';render();}
+    } catch { msg.className='msg err'; msg.textContent='Network error.'; }
+    finally { btn.disabled=false; btn.textContent='Publish top story'; }
   };
+
+  // ── bulletins ──
+  window.loadBulletins = async () => {
+    const lang = $('r_lang').value, btn = $('r_load'), list = $('blist');
+    btn.disabled = true; btn.textContent = 'Loading…'; list.innerHTML = '';
+    try {
+      // key on the SUMMARY's language (world bulletin retags article language) — same as the app
+      const { data, error } = await sb.from('articles')
+        .select('source_id,title,image_url,image_source,image_credit,source_name,url,category,summaries!inner(headline,summary,audio_url,language)')
+        .eq('summaries.language', lang).not('summaries.audio_url','is',null)
+        .order('fetched_at',{ascending:false}).limit(40);
+      if (error) throw error;
+      const rows = (data||[]).filter(a => a.summaries?.[0]?.audio_url);
+      if (!rows.length) { list.innerHTML = `<div class="bempty">No bulletin audio found for this language yet.</div>`; return; }
+      // Store clean data on window and dispatch by INDEX — never embed text in an HTML attribute
+      // (a headline with a quote or < would break that). Index-based can't break.
+      window._reels = rows.map(a => { const s = a.summaries[0];
+        return { img:a.image_url, headline:s.headline||a.title, summary:s.summary,
+          credit:a.image_credit||(a.image_source==='pexels'?'Representative photo · Pexels':a.image_source==='wikimedia'?'Photo: Wikimedia':''),
+          source:a.source_name||'Khabrr', audio:s.audio_url }; });
+      list.innerHTML = '';
+      window._reels.forEach((r,i) => {
+        const el = document.createElement('div'); el.className = 'bitem';
+        el.innerHTML = `
+          <img class="bthumb" src="${esc(r.img||'')}" onerror="this.style.opacity=.15" crossorigin="anonymous" />
+          <div class="binfo">
+            <h3>${esc(r.headline)}</h3>
+            <p>${esc(r.summary)}</p>
+            <div class="bcred">${esc(r.source)}${r.credit?' · '+esc(r.credit):''}</div>
+          </div>
+          <div class="bact">
+            <button onclick="playAudio(_reels[${i}].audio,this)">▶ Play</button>
+            <button class="dl" onclick="makeReel(_reels[${i}])">⬇ Download reel</button>
+          </div>`;
+        list.appendChild(el);
+      });
+    } catch (e) { list.innerHTML = `<div class="bempty">Couldn't load: ${esc(e.message||'error')}</div>`; }
+    finally { btn.disabled = false; btn.textContent = 'Load bulletins'; }
+  };
+  const esc = s => String(s??'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+
+  let previewAudio;
+  window.playAudio = (url, btn) => {
+    if (previewAudio) { previewAudio.pause(); if (previewAudio._btn) previewAudio._btn.textContent = '▶ Play'; }
+    if (btn._playing) { btn._playing = false; btn.textContent = '▶ Play'; return; }
+    previewAudio = new Audio(url); previewAudio._btn = btn; previewAudio.crossOrigin = 'anonymous';
+    previewAudio.play(); btn.textContent = '⏸ Pause'; btn._playing = true;
+    previewAudio.onended = () => { btn.textContent = '▶ Play'; btn._playing = false; };
+  };
+
+  // ── reel engine: 1080×1920 canvas + TTS audio → MediaRecorder ──
+  let recorder, drawReq, reelAudio, reelCtx, cancelled = false;
+  window.cancelReel = () => { cancelled = true; try{recorder&&recorder.state!=='inactive'&&recorder.stop();}catch{} try{reelAudio&&reelAudio.pause();}catch{} cancelAnimationFrame(drawReq); $('rov').classList.remove('on'); };
+
+  window.makeReel = async (item) => {
+    cancelled = false;
+    $('rov').classList.add('on'); $('rstat').textContent = 'Loading image & audio…'; $('rfill').style.width = '0';
+    const canvas = $('rcanvas'), ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#07080F'; ctx.fillRect(0,0,1080,1920);
+
+    // load image (CORS-clean → won't taint the canvas)
+    let img = null;
+    if (item.img) {
+      img = new Image(); img.crossOrigin = 'anonymous';
+      try { await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=item.img; }); }
+      catch { img = null; }
+    }
+
+    // audio element routed to a stream we can record
+    reelAudio = new Audio(); reelAudio.crossOrigin = 'anonymous'; reelAudio.src = item.audio;
+    reelCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const srcNode = reelCtx.createMediaElementSource(reelAudio);
+    const dest = reelCtx.createMediaStreamDestination();
+    srcNode.connect(dest); srcNode.connect(reelCtx.destination);
+    await new Promise((res,rej)=>{ reelAudio.onloadedmetadata=res; reelAudio.onerror=()=>rej(new Error('audio')); }).catch(()=>{});
+    const dur = reelAudio.duration && isFinite(reelAudio.duration) ? reelAudio.duration : 45;
+
+    // precompute wrapped text
+    const head = wrap(ctx, item.headline||'', 'bold 62px '+SANS, 960);
+    const body = wrap(ctx, item.summary||'', '40px '+SANS, 960);
+
+    const draw = () => {
+      const t = reelAudio.currentTime, p = Math.min(1, t/dur);
+      ctx.fillStyle = '#07080F'; ctx.fillRect(0,0,1080,1920);
+      // image with slow Ken Burns zoom
+      if (img) {
+        const zoom = 1 + 0.08*p, iw = img.width, ih = img.height;
+        const targetH = 1180, scale = Math.max(1080/iw, targetH/ih)*zoom;
+        const dw = iw*scale, dh = ih*scale;
+        ctx.drawImage(img, (1080-dw)/2, (targetH-dh)/2 - 20*p, dw, dh);
+      } else {
+        ctx.fillStyle = '#12142a'; ctx.fillRect(0,0,1080,1180);
+      }
+      // gradient fade into panel
+      const g = ctx.createLinearGradient(0,700,0,1200);
+      g.addColorStop(0,'rgba(7,8,15,0)'); g.addColorStop(1,'#07080F');
+      ctx.fillStyle = g; ctx.fillRect(0,700,1080,500);
+      ctx.fillStyle = '#07080F'; ctx.fillRect(0,1180,1080,740);
+      // photo credit pill
+      if (item.credit) {
+        ctx.font = '26px '+SANS; const cw = ctx.measureText(item.credit).width + 36;
+        ctx.fillStyle = 'rgba(0,0,0,.5)'; roundRect(ctx, 1080-cw-40, 44, cw, 46, 23); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.textAlign='left'; ctx.fillText(item.credit, 1080-cw-22, 74);
+      }
+      // wordmark
+      let y = 1250;
+      ctx.textAlign = 'left'; ctx.font = 'bold 44px '+SANS; ctx.fillStyle = '#fff';
+      ctx.fillText('khabrr', 70, y); const kw = ctx.measureText('khabrr').width;
+      ctx.fillStyle = '#FF6B9D'; ctx.fillText('.', 70+kw+2, y);
+      // headline
+      y += 78; ctx.fillStyle = '#EEEEFF'; ctx.font = 'bold 62px '+SANS;
+      head.slice(0,3).forEach(l => { ctx.fillText(l, 70, y); y += 74; });
+      // summary
+      y += 18; ctx.fillStyle = 'rgba(238,238,255,.72)'; ctx.font = '40px '+SANS;
+      body.slice(0,8).forEach(l => { ctx.fillText(l, 70, y); y += 56; });
+      // source
+      y += 20; ctx.fillStyle = 'rgba(238,238,255,.4)'; ctx.font = '30px '+SANS;
+      ctx.fillText((item.source||'').toUpperCase(), 70, y);
+      // progress bar
+      ctx.fillStyle = 'rgba(124,111,255,.25)'; roundRect(ctx,70,1840,940,8,4); ctx.fill();
+      ctx.fillStyle = '#7C6FFF'; roundRect(ctx,70,1840,940*p,8,4); ctx.fill();
+      // update overlay UI
+      $('rfill').style.width = (p*100)+'%';
+      $('rstat').textContent = `Recording reel…  ${fmt(t)} / ${fmt(dur)}`;
+      if (!cancelled && !reelAudio.ended) drawReq = requestAnimationFrame(draw);
+    };
+
+    // combine canvas video + audio into one stream, record it
+    const vstream = canvas.captureStream(30);
+    const astream = dest.stream;
+    const mixed = new MediaStream([...vstream.getVideoTracks(), ...astream.getAudioTracks()]);
+    const mime = pickMime();
+    const chunks = [];
+    recorder = new MediaRecorder(mixed, { mimeType: mime, videoBitsPerSecond: 6_000_000 });
+    recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    recorder.onstop = () => {
+      cancelAnimationFrame(drawReq); try{reelCtx.close();}catch{}
+      if (cancelled) return;
+      const blob = new Blob(chunks, { type: mime });
+      const ext = mime.includes('mp4') ? 'mp4' : 'webm';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `khabrr-reel-${(item.headline||'bulletin').slice(0,32).replace(/[^\w]+/g,'-').toLowerCase()}.${ext}`;
+      a.click();
+      $('rstat').textContent = 'Done ✓ — reel downloaded.'; $('rclose').textContent = 'Close';
+      setTimeout(()=>{ if(!cancelled) $('rov').classList.remove('on'); $('rclose').textContent='Cancel'; }, 1800);
+    };
+
+    reelAudio.onended = () => { try{ recorder.state!=='inactive' && recorder.stop(); }catch{} };
+    $('rstat').textContent = 'Recording reel…'; $('rclose').textContent = 'Cancel';
+    recorder.start();
+    await reelCtx.resume().catch(()=>{});
+    try { await reelAudio.play(); } catch { $('rstat').textContent = 'Tap the page then retry — the browser blocked autoplay.'; }
+    draw();
+  };
+
+  const SANS = 'ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
+  function pickMime() {
+    for (const m of ['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'])
+      if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
+    return 'video/webm';
+  }
+  function wrap(ctx, text, font, maxW) {
+    ctx.font = font; const words = text.split(/\s+/); const lines = []; let line = '';
+    for (const w of words) { const test = line ? line+' '+w : w; if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; } else line = test; }
+    if (line) lines.push(line); return lines;
+  }
+  function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+  const fmt = s => { s=Math.max(0,Math.floor(s)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; };
 
   sb.auth.onAuthStateChange(() => boot());
   boot();
