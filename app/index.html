@@ -28,6 +28,10 @@
   .btn { display: inline-flex; align-items: center; gap: 8px; background: #0D0F1E; border: 1px solid rgba(124,111,255,.25);
          color: #EEEEFF; text-decoration: none; padding: 13px 22px; border-radius: 14px; font-weight: 700; font-size: 15px; }
   .btn:active { opacity: .7; }
+  /* Primary CTA styling when we know the auto-redirect is blocked (in-app browsers) */
+  .btn.primary { background: linear-gradient(135deg, #5B4FE0, #7C6FFF); border-color: transparent; box-shadow: 0 8px 24px rgba(124,111,255,.35); }
+  .hint { display: none; color: rgba(238,238,255,.4); font-size: 13px; line-height: 1.5; max-width: 300px; margin-top: 2px; }
+  .hint b { color: rgba(238,238,255,.7); }
 </style>
 </head>
 <body>
@@ -41,14 +45,27 @@
     <a class="btn" id="ios"  href="https://apps.apple.com/in/app/khabrr/id6779893297">Download on the App Store</a>
     <a class="btn" id="play" href="https://play.google.com/store/apps/details?id=com.khabrr.app">Get it on Google Play</a>
   </div>
+  <p class="hint" id="hint">Auto-open is blocked inside this app. Tap the button above, or open this page in <b>Safari</b> via the <b>•••</b> menu.</p>
 <script>
   var IOS  = 'https://apps.apple.com/in/app/khabrr/id6779893297';
   var PLAY = 'https://play.google.com/store/apps/details?id=com.khabrr.app';
   var ua = navigator.userAgent || navigator.vendor || '';
   var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   var isAndroid = /android/i.test(ua);
-  if (isIOS || isAndroid) {
-    // auto-redirect mobile users straight to their store
+  // Meta/other in-app WKWebViews block JS-initiated store redirects (no user gesture).
+  // iOS is the hard block; Android Custom Tabs usually allow it, so only guard the in-app case.
+  var isInApp = /FBAN|FBAV|FB_IAB|Instagram|Line|Snapchat|Twitter|Pinterest|WhatsApp|Threads/i.test(ua);
+
+  // Point both buttons at the current platform's store, and highlight the right one.
+  if (isIOS)     { document.getElementById('ios').className  = 'btn primary'; }
+  if (isAndroid) { document.getElementById('play').className = 'btn primary'; }
+
+  if (isInApp && isIOS) {
+    // Auto-redirect will be silently blocked here — tell the user to tap instead of lying.
+    document.getElementById('opening').textContent = 'Tap below to download Khabrr:';
+    document.getElementById('hint').style.display = 'block';
+  } else if (isIOS || isAndroid) {
+    // Real mobile browsers (and Android in-app tabs): auto-redirect straight to the store.
     setTimeout(function () { location.replace(isIOS ? IOS : PLAY); }, 400);
   } else {
     // desktop: no auto-redirect, just show both buttons
