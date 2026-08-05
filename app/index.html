@@ -32,6 +32,14 @@
   .btn.primary { background: linear-gradient(135deg, #5B4FE0, #7C6FFF); border-color: transparent; box-shadow: 0 8px 24px rgba(124,111,255,.35); }
   .hint { display: none; color: rgba(238,238,255,.4); font-size: 13px; line-height: 1.5; max-width: 300px; margin-top: 2px; }
   .hint b { color: rgba(238,238,255,.7); }
+  /* In-app (Instagram/FB) iOS: Safari is the only route — make it the hero. */
+  .safari { display: none; width: 100%; max-width: 340px; background: rgba(124,111,255,.08); border: 1px solid rgba(124,111,255,.3);
+            border-radius: 16px; padding: 18px 20px; text-align: left; }
+  .safari .arrow { position: fixed; top: 60px; right: 18px; font-size: 30px; color: #7C6FFF; animation: bob 1.1s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .safari h3 { font-size: 17px; font-weight: 800; margin-bottom: 10px; color: #EEEEFF; }
+  .safari ol { margin: 0 0 0 18px; padding: 0; color: rgba(238,238,255,.75); font-size: 15px; line-height: 1.9; }
+  .safari ol b { color: #A89BFF; }
 </style>
 </head>
 <body>
@@ -41,6 +49,17 @@
   </div>
   <div class="tag">STAY IN THE KNOW</div>
   <p class="opening" id="opening">Opening your app store…</p>
+
+  <!-- Shown only inside Instagram/FB on iOS, where the store buttons are blocked by Meta. -->
+  <div class="safari" id="safari">
+    <div class="arrow">⤴</div>
+    <h3>Open in your browser to install</h3>
+    <ol>
+      <li>Tap <b>•••</b> at the top-right</li>
+      <li>Choose <b>Open in browser</b></li>
+    </ol>
+  </div>
+
   <div class="stores">
     <a class="btn" id="ios"  href="https://apps.apple.com/in/app/khabrr/id6779893297">Download on the App Store</a>
     <a class="btn" id="play" href="https://play.google.com/store/apps/details?id=com.khabrr.app">Get it on Google Play</a>
@@ -66,9 +85,15 @@
   document.getElementById('play').className = 'btn primary';
 
   if (isInApp && isIOS) {
-    // Auto-redirect will be silently blocked here — tell the user to tap instead of lying.
-    document.getElementById('opening').textContent = 'Tap below to download Khabrr:';
-    document.getElementById('hint').style.display = 'block';
+    // Instagram/FB on iOS block ALL outbound store handoffs (https AND itms-apps://),
+    // and iOS gives no way to auto-jump to Safari. The ONLY working route is the user
+    // opening this page in Safari via ••• → so make that the hero instruction.
+    document.getElementById('opening').style.display = 'none';
+    document.getElementById('safari').style.display = 'block';
+    // Buttons are useless in this sandbox — demote them (not primary/accent) so the
+    // Safari steps read as the real action, and keep them only as a last resort.
+    document.getElementById('ios').className  = 'btn';
+    document.getElementById('play').className = 'btn';
   } else if (isIOS || isAndroid) {
     // Real mobile browsers (and Android in-app tabs): auto-redirect straight to the store.
     setTimeout(function () { location.replace(isIOS ? IOS : PLAY); }, 400);
