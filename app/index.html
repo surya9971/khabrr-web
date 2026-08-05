@@ -48,6 +48,9 @@
   <p class="hint" id="hint">Auto-open is blocked inside this app. Tap the button above, or open this page in <b>Safari</b> via the <b>•••</b> menu.</p>
 <script>
   var IOS  = 'https://apps.apple.com/in/app/khabrr/id6779893297';
+  // itms-apps:// is registered directly to the App Store app, so restrictive in-app
+  // WKWebViews (Instagram/FB) that ignore an https apps.apple.com link still hand this off.
+  var IOS_APP = 'itms-apps://apps.apple.com/in/app/khabrr/id6779893297';
   var PLAY = 'https://play.google.com/store/apps/details?id=com.khabrr.app';
   var ua = navigator.userAgent || navigator.vendor || '';
   var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -56,9 +59,11 @@
   // iOS is the hard block; Android Custom Tabs usually allow it, so only guard the in-app case.
   var isInApp = /FBAN|FBAV|FB_IAB|Instagram|Line|Snapchat|Twitter|Pinterest|WhatsApp|Threads/i.test(ua);
 
-  // Point both buttons at the current platform's store, and highlight the right one.
-  if (isIOS)     { document.getElementById('ios').className  = 'btn primary'; }
-  if (isAndroid) { document.getElementById('play').className = 'btn primary'; }
+  // Both store buttons use the primary (accent) style.
+  // On iOS, use the itms-apps:// scheme so the tap opens the App Store *app*, not a web page.
+  if (isIOS)     { document.getElementById('ios').href = IOS_APP; }
+  document.getElementById('ios').className  = 'btn primary';
+  document.getElementById('play').className = 'btn primary';
 
   if (isInApp && isIOS) {
     // Auto-redirect will be silently blocked here — tell the user to tap instead of lying.
