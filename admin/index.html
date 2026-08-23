@@ -354,6 +354,31 @@
     return 'invalid';
   }
 
+  // `hqdefault.jpg` is a GUESS, and it's WRONG for a lot of Shorts — confirmed live (23 Aug 2026):
+  // YouTube's own oEmbed response for a real, public Short reported its thumbnail at `.../hq2.jpg`,
+  // not `hqdefault.jpg`; requesting hqdefault.jpg for that same video returned YouTube's generic
+  // "no thumbnail" gray placeholder even though the video is completely valid. So: ask oEmbed for the
+  // REAL thumbnail (same call admin-create-story makes server-side for the actually-published
+  // image_url) and cache per video id — one fetch per id, never per keystroke. Returns null the FIRST
+  // time an id is seen (falls back to the hqdefault.jpg guess immediately so the preview never looks
+  // empty), then re-renders once the real thumbnail resolves to swap it in.
+  const ytThumbCache = {};
+  function resolveYouTubeThumb(vid) {
+    if (ytThumbCache[vid.id] !== undefined) return ytThumbCache[vid.id];
+    ytThumbCache[vid.id] = null;
+    const canonicalUrl = vid.isShort ? `https://www.youtube.com/shorts/${vid.id}` : `https://www.youtube.com/watch?v=${vid.id}`;
+    fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(canonicalUrl)}&format=json`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d || !d.thumbnail_url) return;
+        ytThumbCache[vid.id] = d.thumbnail_url;
+        render();
+        if (Object.keys(translations).length) syncI18nCardChrome();
+      })
+      .catch(() => {});   // CORS/network hiccup — silently keep showing the guessed fallback
+    return null;
+  }
+
   // Image story vs Video story is purely a DISPLAY toggle — it doesn't reset f_image. Its value is
   // irrelevant in video mode anyway: the SERVER always overrides image_url to the video's own
   // thumbnail whenever a video is attached (see finalImageUrl in admin-create-story), so whatever's
@@ -428,7 +453,7 @@
     if (!vidRaw) { vidHint.textContent = '— optional, plays inline on the card like a regular news video'; vidHint.style.color = ''; }
     else if (vid === 'invalid') { vidHint.textContent = "Couldn't recognize that as a YouTube link — check the URL."; vidHint.style.color = 'var(--bad)'; }
     else { vidHint.textContent = vid.isShort ? 'Short detected ✓ — plays vertically on the card.' : 'Video detected ✓ — plays on the card.'; vidHint.style.color = 'var(--ok)'; }
-    const vidThumb = (vid && vid !== 'invalid') ? `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg` : null;
+    const vidThumb = (vid && vid !== 'invalid') ? (resolveYouTubeThumb(vid) || `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`) : null;
     const pimg=$('pv_img'); const shownImg = vidThumb || img;
     if(shownImg){pimg.style.backgroundImage=`url("${shownImg}")`;$('pv_ph').hidden=true;}else{pimg.style.backgroundImage='none';$('pv_ph').hidden=false;}
     $('pv_play').hidden = !vidThumb;
@@ -555,7 +580,7 @@
     const img = $('f_image').value.trim(), cr = $('f_credit').value.trim();
     const src = ($('f_source').value.trim()||'Khabrr').toUpperCase();
     const vid = parseYouTube($('f_video').value.trim());
-    const vidThumb = (vid && vid !== 'invalid') ? `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg` : null;
+    const vidThumb = (vid && vid !== 'invalid') ? (resolveYouTubeThumb(vid) || `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`) : null;
     $('i18nPreviews').querySelectorAll('.i18nCard').forEach(card => {
       const pimg = card.querySelector('.i18n_pimg'), ph = card.querySelector('.i18n_ph'), pc = card.querySelector('.i18n_pcredit'), pp = card.querySelector('.i18n_pplay');
       const shownImg = vidThumb || img;
