@@ -47,6 +47,15 @@
   input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
   textarea{resize:vertical;min-height:110px;line-height:1.6}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .modeRow{display:flex;gap:8px}
+  .modeBtn{flex:1;background:var(--card2);border:1px solid var(--line2);color:var(--mid);border-radius:9px;padding:10px;font:inherit;font-size:13.5px;font-weight:650;cursor:pointer;text-transform:none;letter-spacing:0}
+  .modeBtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .dupRow{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line2);border-radius:9px;padding:9px 12px}
+  .dupRow .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;color:var(--text)}
+  .dupRow .s{color:var(--muted);font-size:10.5px;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
+  .dupRow button{background:var(--accent);border:none;color:#fff;border-radius:7px;padding:6px 11px;font-size:11.5px;font-weight:650;cursor:pointer;white-space:nowrap}
+  .dupPicked{display:flex;align-items:center;gap:8px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:9px;padding:9px 12px;font-size:12.5px;color:#bff5cf}
+  .dupPicked button{background:none;border:none;color:#bff5cf;text-decoration:underline;cursor:pointer;font:inherit;font-size:11.5px;padding:0;margin-left:auto}
   .count{font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0}
   .count.warn{color:var(--pop)}
   .hint{font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;font-size:11.5px}
@@ -61,21 +70,27 @@
   .msg{border-radius:9px;padding:11px 14px;font-size:13.5px;display:none}
   .msg.err{display:block;background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.3);color:#ffc9c9}
   .msg.ok{display:block;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#bff5cf}
-  .i18ntabs{display:flex;flex-wrap:wrap;gap:6px}
-  .i18ntab{background:var(--card2);border:1px solid var(--line2);color:var(--mid);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:650;cursor:pointer}
-  .i18ntab.on{border-color:var(--accent);color:var(--text)}
-  .i18ntab.off{opacity:.45;text-decoration:line-through}
-  .i18ntab.bad{border-color:var(--bad)}
-  #i18nEdit{display:flex;flex-direction:column;gap:12px}
   .i18nBtn{background:var(--card2);border:1px solid var(--line2);color:var(--text);border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:650;cursor:pointer;white-space:nowrap}
   .i18nBtn:hover{border-color:var(--accent)}
-  .i18nBtn:disabled{opacity:.5;cursor:not-allowed}
+  .i18nBtn:disabled{opacity:.4;cursor:not-allowed}
   .preview{padding:24px 20px;border-left:1px solid var(--line)}
+  /* stacked per-language preview cards, shown below the form+preview grid, full width */
+  .i18nPreviews{grid-column:1/-1;padding:8px 20px 28px;display:flex;flex-wrap:wrap;gap:20px;justify-content:center;border-top:1px solid var(--line)}
+  .i18nCard{width:260px;display:flex;flex-direction:column;gap:10px;transition:opacity .15s}
+  .i18nCard.excluded{opacity:.4}
+  .i18nCheck{flex-direction:row;align-items:center;gap:8px;text-transform:none;font-weight:700;font-size:13.5px;color:var(--text);letter-spacing:0}
+  .i18nCheck input{width:auto}
+  .i18nWarn{font-size:10.5px;font-weight:650;color:var(--bad);text-transform:uppercase;letter-spacing:.03em}
+  .i18nCard .phone{max-width:none}
+  .i18nCard .ptitle,.i18nCard .psum{outline:none;border-radius:6px}
+  .i18nCard .ptitle:focus,.i18nCard .psum:focus{background:rgba(124,111,255,.08);box-shadow:0 0 0 2px var(--line2)}
+  .i18nCard.bad .phone{border-color:var(--bad)}
   .plabel{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:12px}
   .phone{background:var(--card);border:1px solid var(--line2);border-radius:22px;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.5);max-width:300px;margin:0 auto}
   .pimg{position:relative;aspect-ratio:1/.86;background:#0a0b18 center/cover no-repeat;display:flex;align-items:flex-end}
   .pimg .ph{margin:auto;color:var(--muted);font-size:12px}
   .pcredit{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;font-size:9px;padding:3px 7px;border-radius:20px;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pplay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;padding-left:3px}
   .pbody{padding:16px 16px 18px}
   .ptitle{font-size:16px;font-weight:750;line-height:1.32;margin:0 0 8px}
   .psum{font-size:13px;color:var(--mid);line-height:1.55;margin:0 0 12px}
@@ -168,7 +183,7 @@
           </select>
         </label>
         <label>Country
-          <select id="f_country">
+          <select id="f_country" onchange="onLangChange()">
             <option value="in">India (in)</option><option value="us">United States (us)</option>
             <option value="gb">United Kingdom (gb)</option><option value="ae">UAE (ae)</option>
             <option value="au">Australia (au)</option><option value="ca">Canada (ca)</option>
@@ -188,31 +203,52 @@
       <label>Summary <span id="c_summary" class="count"></span>
         <textarea id="f_summary" maxlength="900" placeholder="45–70 words of concrete facts." oninput="render()"></textarea>
       </label>
-      <label>Image URL
-        <input id="f_image" placeholder="https://…" oninput="render()" />
-        <span class="hint">Must be https. The card's cover image.</span>
-        <div class="uprow">
-          <input id="f_file" type="file" accept="image/*" onchange="uploadImage(event)" />
-          <span id="upstat" class="hint"></span>
-        </div>
-        <span class="hint">…or upload from your computer — auto-shrunk to keep the card fast, and removed after 3 days.</span>
-      </label>
-      <div class="row">
-        <label>Photo credit<input id="f_credit" placeholder="e.g. Photo: Reuters" oninput="render()" /></label>
-        <label>Source name<input id="f_source" placeholder="Khabrr" oninput="render()" /></label>
+      <div class="modeRow">
+        <button type="button" class="modeBtn on" id="mode_image" onclick="setStoryMode('image')">📷 Image story</button>
+        <button type="button" class="modeBtn" id="mode_video" onclick="setStoryMode('video')">🎬 Video story</button>
       </div>
+
+      <div id="imageFields" style="display:flex;flex-direction:column;gap:16px">
+        <label>Image URL
+          <input id="f_image" placeholder="https://…" value="https://khabrr.in/icon.png" oninput="render()" />
+          <span class="hint">Must be https. The card's cover image.</span>
+          <div class="uprow">
+            <input id="f_file" type="file" accept="image/*" onchange="uploadImage(event)" />
+            <span id="upstat" class="hint"></span>
+          </div>
+          <span class="hint">…or upload from your computer — auto-shrunk to keep the card fast, and removed after 3 days.</span>
+        </label>
+        <label>Photo credit<input id="f_credit" placeholder="e.g. Photo: Reuters" oninput="render()" /></label>
+      </div>
+
+      <div id="videoFields" hidden style="display:flex;flex-direction:column;gap:16px">
+        <label>YouTube video / Short <span id="f_video_hint" class="hint">— plays inline on the card like a regular news video</span>
+          <input id="f_video" placeholder="https://youtube.com/watch?v=… or /shorts/…" oninput="render()" />
+        </label>
+        <span class="hint">This video's own YouTube thumbnail becomes the story's cover EVERYWHERE — the feed, Bookmarks, and when it's shared — not just while it's playing. Nothing else to fill in here.</span>
+      </div>
+
+      <label>Source name<input id="f_source" placeholder="Khabrr" value="Khabrr" oninput="render()" /></label>
       <label>Read-more URL <span class="hint">— opens on swipe-right</span>
-        <input id="f_readmore" placeholder="https://…" oninput="render()" />
+        <input id="f_readmore" placeholder="https://…" value="https://m.youtube.com/@Khabrrapp/shorts?ra=m" oninput="render()" />
       </label>
+
+      <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:16px;margin-top:4px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <span class="hint" style="font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)">Replace a duplicate (optional)</span>
+          <button type="button" class="i18nBtn" id="dupSearchBtn" onclick="findDuplicates()">🔍 Find it for me</button>
+        </div>
+        <span class="hint">If an older, auto-ingested version of this exact story is already in the feed, publishing removes it everywhere so only yours shows.</span>
+        <input id="f_dupurl" placeholder="https://… (the duplicate's own article URL)" oninput="renderDupPicked()" />
+        <div id="dupResults"></div>
+      </div>
 
       <div id="i18nSection" hidden style="display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:16px;margin-top:4px">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <span class="hint" style="font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)">Indian language versions</span>
-          <button type="button" class="i18nBtn" id="i18nBtn" onclick="translateAll()">🌐 Translate to Indian languages</button>
+          <button type="button" class="i18nBtn" id="i18nBtn" onclick="translateAll()">🌐 Translate to other languages</button>
         </div>
-        <span class="hint" id="i18nHint">Translates this headline + summary into Hindi, Marathi, Bengali, Telugu, Tamil, Gujarati, Kannada, Malayalam, Punjabi, Urdu &amp; Odia. Preview and edit each before publishing — publish will create a card + push in every language left checked.</span>
-        <div id="i18nTabs" class="i18ntabs" hidden></div>
-        <div id="i18nEdit" hidden></div>
+        <span class="hint" id="i18nHint">Translates this headline + summary into the other languages served in the selected country. A full preview card for each appears below — all included by default, uncheck any you want to skip.</span>
       </div>
 
       <div id="msg" class="msg"></div>
@@ -224,6 +260,7 @@
       <div class="phone">
         <div class="pimg" id="pv_img"><span class="ph" id="pv_ph">no image</span>
           <span class="pcredit" id="pv_credit" hidden></span>
+          <span class="pplay" id="pv_play" hidden>▶</span>
         </div>
         <div class="pbody">
           <p class="ptitle" id="pv_title">Your headline appears here</p>
@@ -233,6 +270,7 @@
         </div>
       </div>
     </div>
+    <div id="i18nPreviews" class="i18nPreviews" hidden></div>
   </div>
 
   <!-- BULLETIN REELS -->
@@ -304,6 +342,80 @@
     $('view-pub').hidden = t!=='pub'; $('view-reel').hidden = t!=='reel';
   };
 
+  // Same shapes the server (`normaliseYouTubeUrl`) and the real feed player recognise — mirrored
+  // here purely so the admin preview can show the ACTUAL YouTube thumbnail the app will display
+  // (the client derives its poster from the video id, not from the Image URL field, once a video
+  // is attached — this keeps the preview honest about that).
+  function parseYouTube(raw) {
+    const url = (raw||'').trim(); if (!url) return null;
+    let m = url.match(/\/shorts\/([\w-]{6,})/); if (m) return { id:m[1], isShort:true };
+    m = url.match(/[?&]v=([\w-]{6,})/); if (m) return { id:m[1], isShort:false };
+    m = url.match(/youtu\.be\/([\w-]{6,})/); if (m) return { id:m[1], isShort:false };
+    return 'invalid';
+  }
+
+  // Image story vs Video story is purely a DISPLAY toggle — it doesn't reset f_image. Its value is
+  // irrelevant in video mode anyway: the SERVER always overrides image_url to the video's own
+  // thumbnail whenever a video is attached (see finalImageUrl in admin-create-story), so whatever's
+  // sitting in the hidden Image URL field is never actually used. Switching to 'image' DOES clear
+  // f_video, so a leftover video link can't silently make an "Image story" play as a video against
+  // what the mode toggle says.
+  window.setStoryMode = (mode) => {
+    $('mode_image').classList.toggle('on', mode === 'image');
+    $('mode_video').classList.toggle('on', mode === 'video');
+    $('imageFields').hidden = mode !== 'image';
+    $('videoFields').hidden = mode !== 'video';
+    if (mode === 'image') $('f_video').value = '';
+    render();
+  };
+
+  // ── duplicate finder: reads the SAME headline-overlap heuristic the feed itself uses (Pass 3 of
+  // feedItems' dedup in app/(tabs)/index.tsx — shared significant words ≥4 chars) to surface likely
+  // duplicates of the story being typed, scoped to the story's own language+country. Read-only query
+  // against the public `articles` table (same anon-key read every screen in the app already does) —
+  // never writes anything; picking a result just fills f_dupurl for the publish call to act on. ──
+  function significantWords(text) { return (text||'').toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(w => w.length >= 4); }
+  function headlineOverlapScore(a, b) {
+    const wa = new Set(significantWords(a));
+    let shared = 0;
+    for (const w of significantWords(b)) if (wa.has(w)) shared++;
+    return shared;
+  }
+  window.findDuplicates = async () => {
+    const h = $('f_headline').value.trim(), results = $('dupResults');
+    if (h.length < 6) { results.innerHTML = '<span class="hint">Write a headline first.</span>'; return; }
+    const btn = $('dupSearchBtn'); btn.disabled = true; btn.textContent = 'Searching…';
+    results.innerHTML = '';
+    try {
+      const cutoff = new Date(Date.now() - 72*60*60*1000).toISOString();
+      const { data, error } = await sb.from('articles')
+        .select('id,title,url,source_name,fetched_at')
+        .eq('language', $('f_language').value).eq('country', $('f_country').value)
+        .gt('fetched_at', cutoff).order('fetched_at', { ascending:false }).limit(300);
+      if (error) throw error;
+      const scored = (data||[]).filter(a => a.url)
+        .map(a => ({ ...a, score: headlineOverlapScore(h, a.title||'') }))
+        .filter(a => a.score >= 3).sort((a,b) => b.score - a.score).slice(0, 6);
+      if (!scored.length) { results.innerHTML = '<span class="hint">No likely duplicates found for this language/country in the last 72h.</span>'; return; }
+      scored.forEach(a => {
+        const row = document.createElement('div'); row.className = 'dupRow';
+        row.innerHTML = `<span class="t">${esc(a.title||'')}</span><span class="s">${esc(a.source_name||'')}</span><button type="button">Use this</button>`;
+        row.querySelector('button').onclick = () => { $('f_dupurl').value = a.url; renderDupPicked(); };
+        results.appendChild(row);
+      });
+    } catch (e) { results.innerHTML = `<span class="hint" style="color:var(--bad)">Search failed: ${esc(e.message||'error')}</span>`; }
+    finally { btn.disabled = false; btn.textContent = '🔍 Find it for me'; }
+  };
+  window.renderDupPicked = () => {
+    const url = $('f_dupurl').value.trim(), results = $('dupResults');
+    results.innerHTML = '';
+    if (!url) return;
+    const box = document.createElement('div'); box.className = 'dupPicked';
+    box.innerHTML = `<span>Will remove on publish: ${esc(url)}</span><button type="button">clear</button>`;
+    box.querySelector('button').onclick = () => { $('f_dupurl').value = ''; renderDupPicked(); };
+    results.appendChild(box);
+  };
+
   // ── publish (unchanged) ──
   window.render = () => {
     const h=$('f_headline').value.trim(), s=$('f_summary').value.trim(), img=$('f_image').value.trim(), cr=$('f_credit').value.trim();
@@ -312,77 +424,146 @@
     $('c_summary').className='count'+(s&&(words<40||words>75)?' warn':'');
     $('pv_title').textContent=h||'Your headline appears here'; $('pv_sum').textContent=s||'Your summary appears here.';
     $('pv_meta').textContent=`${src} · just now`;
-    const pimg=$('pv_img'); if(img){pimg.style.backgroundImage=`url("${img}")`;$('pv_ph').hidden=true;}else{pimg.style.backgroundImage='none';$('pv_ph').hidden=false;}
+    const vidRaw = $('f_video').value.trim(), vid = parseYouTube(vidRaw), vidHint = $('f_video_hint');
+    if (!vidRaw) { vidHint.textContent = '— optional, plays inline on the card like a regular news video'; vidHint.style.color = ''; }
+    else if (vid === 'invalid') { vidHint.textContent = "Couldn't recognize that as a YouTube link — check the URL."; vidHint.style.color = 'var(--bad)'; }
+    else { vidHint.textContent = vid.isShort ? 'Short detected ✓ — plays vertically on the card.' : 'Video detected ✓ — plays on the card.'; vidHint.style.color = 'var(--ok)'; }
+    const vidThumb = (vid && vid !== 'invalid') ? `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg` : null;
+    const pimg=$('pv_img'); const shownImg = vidThumb || img;
+    if(shownImg){pimg.style.backgroundImage=`url("${shownImg}")`;$('pv_ph').hidden=true;}else{pimg.style.backgroundImage='none';$('pv_ph').hidden=false;}
+    $('pv_play').hidden = !vidThumb;
     $('pv_credit').hidden=!cr; $('pv_credit').textContent=cr; $('pv_read').hidden=!$('f_readmore').value.trim();
     updateI18nVisibility();
+    // keep every already-rendered language card's image/credit/source/video in sync with the shared fields
+    if (Object.keys(translations).length) syncI18nCardChrome();
   };
 
-  // ── translate to all Indian languages (preview + toggle before publish) ──
-  const INDIA_LANGS = { hi:'Hindi', mr:'Marathi', bn:'Bengali', te:'Telugu', ta:'Tamil', gu:'Gujarati', kn:'Kannada', ml:'Malayalam', pa:'Punjabi', ur:'Urdu', or:'Odia' };
-  let translations = {};   // lang -> {headline, summary, include, failed}
-  let activeI18nTab = null;
-  const I18N_DEFAULT_HINT = 'Translates this headline + summary into Hindi, Marathi, Bengali, Telugu, Tamil, Gujarati, Kannada, Malayalam, Punjabi, Urdu & Odia. Preview and edit each before publishing — publish will create a card + push in every language left checked.';
+  // ── standing defaults, restored after every publish (not blanked) ──
+  const DEFAULT_IMAGE = 'https://khabrr.in/icon.png';
+  const DEFAULT_SOURCE = 'Khabrr';
+  const DEFAULT_READMORE = 'https://m.youtube.com/@Khabrrapp/shorts?ra=m';
 
-  function updateI18nVisibility() { $('i18nSection').hidden = $('f_language').value !== 'en'; }
+  // ── translate to every OTHER language actually served in the selected country: one full preview
+  // card per language, stacked below the main preview, each with its own "include in publish"
+  // checkbox (all on by default) and directly-editable headline/summary (contenteditable, so what
+  // you see IS what gets published). Driven by COUNTRY, not by a fixed India-only list — pick any
+  // country and you get that country's OTHER languages minus whichever one you're writing in. ──
+  // Mirrors LANGUAGE_COUNTRIES in services/newsSources.ts (source of truth for which language serves
+  // which country in the app) — keep in sync if that map changes.
+  const COUNTRY_LANGS = {
+    in: ['en','hi','mr','bn','te','ta','gu','kn','ml','or','pa','ur','ar'],
+    ae: ['en','ar','ur'], sa: ['en','ar'], qa: ['en','ar'], eg: ['en','ar'],
+    pk: ['en','pa','ur','ar'],
+    fr: ['en','fr'], ca: ['en','fr'],
+    de: ['en','de'], es: ['en','es'], br: ['en','pt'], mx: ['en','es'],
+    jp: ['en','ja'], kr: ['en','ko'], ru: ['en','ru'], sg: ['en','zh'],
+    us: ['en'], gb: ['en'], au: ['en'], global: ['en'],
+  };
+  const LANG_NAMES = { en:'English', hi:'Hindi', mr:'Marathi', bn:'Bengali', te:'Telugu', ta:'Tamil', gu:'Gujarati', kn:'Kannada', ml:'Malayalam', pa:'Punjabi', ur:'Urdu', or:'Odia', ar:'Arabic', de:'German', fr:'French', es:'Spanish', pt:'Portuguese', zh:'Chinese', ja:'Japanese', ko:'Korean', ru:'Russian' };
+  let translations = {};   // lang -> {headline, summary, include, failed}
+  let currentTargets = []; // the language list the last translate/render pass used
+
+  function targetLangsFor(country, primaryLang) { return (COUNTRY_LANGS[country] || []).filter(l => l !== primaryLang); }
+  function i18nHintText(targets) { return targets.length
+    ? `Translates this headline + summary into ${targets.map(l=>LANG_NAMES[l]).join(', ')}. A full preview card for each appears below — all included by default, uncheck any you want to skip.`
+    : `${$('f_country').selectedOptions[0]?.textContent || 'This country'} has no other served language besides the one selected above.`; }
+
+  function updateI18nVisibility() {
+    const targets = targetLangsFor($('f_country').value, $('f_language').value);
+    $('i18nSection').hidden = targets.length === 0;
+    if (!targets.length) return;
+    if (!Object.keys(translations).length) $('i18nHint').textContent = i18nHintText(targets);
+    const h = $('f_headline').value.trim(), s = $('f_summary').value.trim();
+    // Disabled (not just silently ignoring clicks) whenever the floor isn't met yet, so it's
+    // visually obvious why nothing happens — this was read as "the button is broken".
+    $('i18nBtn').disabled = !(h.length >= 6 && s.length >= 60);
+  }
   window.onLangChange = () => {
-    translations = {}; activeI18nTab = null;
-    $('i18nTabs').hidden = true; $('i18nTabs').innerHTML = '';
-    $('i18nEdit').hidden = true; $('i18nEdit').innerHTML = '';
-    $('i18nHint').textContent = I18N_DEFAULT_HINT;
+    translations = {}; currentTargets = [];
+    $('i18nPreviews').hidden = true; $('i18nPreviews').innerHTML = '';
     render();
   };
 
   window.translateAll = async () => {
     const h = $('f_headline').value.trim(), s = $('f_summary').value.trim();
+    const language = $('f_language').value, country = $('f_country').value;
+    const targets = targetLangsFor(country, language);
+    if (!targets.length) return;
     if (h.length < 6 || s.length < 60) { $('i18nHint').textContent = 'Write a headline (6+ chars) and summary (60+ chars) first.'; return; }
     const btn = $('i18nBtn'); btn.disabled = true; btn.textContent = 'Translating…';
     const { data:{session} } = await sb.auth.getSession(); if (!session) return window.signOut();
     try {
       const res = await fetch(FN, { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
-        body: JSON.stringify({ action:'translate', password: window._pwd||'', headline: h, summary: s }) });
+        body: JSON.stringify({ action:'translate', password: window._pwd||'', headline: h, summary: s, sourceLanguage: language, targetLanguages: targets }) });
       const out = await res.json();
       if (!res.ok || out.error) { $('i18nHint').textContent = out.error || `Translation failed (${res.status}).`; return; }
-      translations = {};
-      for (const lang of Object.keys(INDIA_LANGS)) {
+      translations = {}; currentTargets = targets;
+      for (const lang of targets) {
         const t = out.translations?.[lang];
         translations[lang] = t ? { headline: t.headline, summary: t.summary, include: true, failed: false }
                                 : { headline: '', summary: '', include: false, failed: true };
       }
       $('i18nHint').textContent = (out.rejected && out.rejected.length)
-        ? `Translated ✓ — ${out.rejected.map(l=>INDIA_LANGS[l]).join(', ')} came back too short, write those manually or leave unchecked.`
-        : 'Translated ✓ — review each language below, uncheck any you want to skip.';
-      activeI18nTab = 'hi';
-      renderI18nTabs(); renderI18nEditor();
-      $('i18nTabs').hidden = false; $('i18nEdit').hidden = false;
+        ? `Translated ✓ — ${out.rejected.map(l=>LANG_NAMES[l]).join(', ')} came back too short, write those manually below or leave unchecked.`
+        : 'Translated ✓ — every card below is editable, uncheck any language you want to skip.';
+      renderI18nPreviews();
+      $('i18nPreviews').hidden = false;
     } catch { $('i18nHint').textContent = 'Network error.'; }
-    finally { btn.disabled = false; btn.textContent = '🌐 Translate to Indian languages'; }
+    finally { btn.disabled = false; btn.textContent = '🌐 Translate to other languages'; updateI18nVisibility(); }
   };
 
-  function renderI18nTabs() {
-    const wrap = $('i18nTabs'); wrap.innerHTML = '';
-    for (const lang of Object.keys(INDIA_LANGS)) {
+  // Full-size phone preview per language, in the order the selected country's languages were
+  // requested in (English's own card is already shown above — this is what follows it).
+  function renderI18nPreviews() {
+    const wrap = $('i18nPreviews'); wrap.innerHTML = '';
+    for (const lang of currentTargets) {
       const t = translations[lang];
-      const b = document.createElement('button'); b.type = 'button';
-      b.className = 'i18ntab' + (lang===activeI18nTab?' on':'') + (!t.include?' off':'') + (t.failed?' bad':'');
-      b.textContent = INDIA_LANGS[lang];
-      b.onclick = () => { activeI18nTab = lang; renderI18nTabs(); renderI18nEditor(); };
-      wrap.appendChild(b);
+      const card = document.createElement('div');
+      card.className = 'i18nCard' + (t.include ? '' : ' excluded') + (t.failed ? ' bad' : '');
+      card.dataset.lang = lang;
+      card.innerHTML = `
+        <label class="i18nCheck">
+          <input type="checkbox" class="i18n_inc" ${t.include?'checked':''} />
+          <span>${esc(LANG_NAMES[lang])}</span>
+          ${t.failed?'<span class="i18nWarn">needs review</span>':''}
+        </label>
+        <div class="phone">
+          <div class="pimg i18n_pimg"><span class="ph i18n_ph">no image</span>
+            <span class="pcredit i18n_pcredit" hidden></span>
+            <span class="pplay i18n_pplay" hidden>▶</span>
+          </div>
+          <div class="pbody">
+            <p class="ptitle i18n_h" contenteditable="true">${esc(t.headline) || 'Your headline appears here'}</p>
+            <p class="psum i18n_s" contenteditable="true">${esc(t.summary) || 'Your summary appears here.'}</p>
+            <div class="pmeta i18n_meta">KHABRR · just now</div>
+          </div>
+        </div>
+      `;
+      card.querySelector('.i18n_inc').onchange = e => { translations[lang].include = e.target.checked; card.classList.toggle('excluded', !e.target.checked); };
+      const stripPaste = el => el.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData||window.clipboardData).getData('text/plain')); });
+      const hEl = card.querySelector('.i18n_h'), sEl = card.querySelector('.i18n_s');
+      hEl.oninput = () => { translations[lang].headline = hEl.textContent.trim(); };
+      sEl.oninput = () => { translations[lang].summary = sEl.textContent.trim(); };
+      stripPaste(hEl); stripPaste(sEl);
+      wrap.appendChild(card);
     }
+    syncI18nCardChrome();
   }
-  function renderI18nEditor() {
-    const lang = activeI18nTab; if (!lang) return;
-    const t = translations[lang]; const box = $('i18nEdit');
-    box.innerHTML = `
-      <label style="flex-direction:row;align-items:center;gap:8px;text-transform:none;font-weight:600;font-size:13px;color:var(--mid)">
-        <input type="checkbox" id="i18n_inc" ${t.include?'checked':''} style="width:auto" /> Include ${esc(INDIA_LANGS[lang])} in publish
-      </label>
-      <label>Headline<input id="i18n_h" value="${esc(t.headline)}" /></label>
-      <label>Summary<textarea id="i18n_s">${esc(t.summary)}</textarea></label>
-      ${t.failed?'<span class="hint" style="color:var(--pop)">Translation came back too short — write it manually or leave unchecked.</span>':''}
-    `;
-    $('i18n_inc').onchange = e => { translations[lang].include = e.target.checked; renderI18nTabs(); };
-    $('i18n_h').oninput = e => { translations[lang].headline = e.target.value; };
-    $('i18n_s').oninput = e => { translations[lang].summary = e.target.value; };
+  // The image/credit/source/video are shared across every language row — keep each card's chrome
+  // in sync with the main form fields without re-touching the editable headline/summary text.
+  function syncI18nCardChrome() {
+    const img = $('f_image').value.trim(), cr = $('f_credit').value.trim();
+    const src = ($('f_source').value.trim()||'Khabrr').toUpperCase();
+    const vid = parseYouTube($('f_video').value.trim());
+    const vidThumb = (vid && vid !== 'invalid') ? `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg` : null;
+    $('i18nPreviews').querySelectorAll('.i18nCard').forEach(card => {
+      const pimg = card.querySelector('.i18n_pimg'), ph = card.querySelector('.i18n_ph'), pc = card.querySelector('.i18n_pcredit'), pp = card.querySelector('.i18n_pplay');
+      const shownImg = vidThumb || img;
+      if (shownImg) { pimg.style.backgroundImage = `url("${shownImg}")`; ph.hidden = true; } else { pimg.style.backgroundImage = 'none'; ph.hidden = false; }
+      pp.hidden = !vidThumb;
+      pc.hidden = !cr; pc.textContent = cr;
+      card.querySelector('.i18n_meta').textContent = `${src} · just now`;
+    });
   }
   // ── image upload (Approach A: client → Supabase Storage → public URL fills f_image) ──
   // Downscale in the browser first (canvas → JPEG) so card images stay small/fast and storage
@@ -436,7 +617,7 @@
     const { data:{session} } = await sb.auth.getSession(); if(!session) return window.signOut();
     btn.disabled=true; btn.textContent='Publishing…';
     try {
-      const payload = {password:window._pwd||'',language:$('f_language').value,country:$('f_country').value,headline:$('f_headline').value.trim(),summary:$('f_summary').value.trim(),imageUrl:$('f_image').value.trim(),credit:$('f_credit').value.trim(),sourceName:$('f_source').value.trim(),readMoreUrl:$('f_readmore').value.trim()};
+      const payload = {password:window._pwd||'',language:$('f_language').value,country:$('f_country').value,headline:$('f_headline').value.trim(),summary:$('f_summary').value.trim(),imageUrl:$('f_image').value.trim(),credit:$('f_credit').value.trim(),sourceName:$('f_source').value.trim(),readMoreUrl:$('f_readmore').value.trim(),videoUrl:$('f_video').value.trim(),replaceUrl:$('f_dupurl').value.trim()};
       const incl = {};
       for (const lang of Object.keys(translations)) {
         const t = translations[lang];
@@ -450,9 +631,15 @@
         msg.className='msg ok';
         const n = out.published ? out.published.length : 1;
         const failNote = out.failed && out.failed.length ? ` (${out.failed.length} language${out.failed.length>1?'s':''} skipped — see console)` : '';
+        const dupNote = out.removedDuplicates ? ` Removed ${out.removedDuplicates} older duplicate${out.removedDuplicates>1?'s':''}.` : '';
         if (out.failed && out.failed.length) console.warn('[admin] skipped languages:', out.failed);
-        msg.textContent = n>1 ? `Published ✓ — live in ${n} languages, expires in 72h${failNote}.` : `Published ✓ — live on ${$('f_language').value}/${$('f_country').value}, expires in 72h.`;
-        for(const f of['f_headline','f_summary','f_image','f_credit','f_readmore'])$(f).value='';
+        msg.textContent = (n>1 ? `Published ✓ — live in ${n} languages, expires in 72h${failNote}.` : `Published ✓ — live on ${$('f_language').value}/${$('f_country').value}, expires in 72h.`) + dupNote;
+        for(const f of['f_headline','f_summary','f_credit','f_dupurl'])$(f).value='';
+        renderDupPicked();
+        // image/source/read-more are standing defaults (Khabrr icon, "Khabrr", the Shorts channel) —
+        // restore them rather than blanking, so the next story starts pre-filled the same way.
+        $('f_image').value = DEFAULT_IMAGE; $('f_source').value = DEFAULT_SOURCE; $('f_readmore').value = DEFAULT_READMORE;
+        window.setStoryMode('image');   // also clears f_video and calls render()
         $('upstat').textContent='';$('upstat').className='hint';
         window.onLangChange();
       }
