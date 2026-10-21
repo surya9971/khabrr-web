@@ -754,14 +754,16 @@
     if (!more) viralShown = [];
     const label = btn.textContent; btn.disabled = true; btn.textContent = 'Searching…';
     list.innerHTML = ''; hint.textContent = 'Searching the web — stories appear as they\'re found…';
-    let shown = 0, failed = 0;
+    let shown = 0, failed = 0, found = 0; const dropped = {};
     const exclude = [...viralShown];
     await Promise.all(['india', 'world', 'science'].map(async (topic) => {
       try {
         const res = await fetch(FN, { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
           body: JSON.stringify({ action:'discover', topic, password: window._pwd||'', exclude }) });
         const out = await res.json();
-        if (!res.ok || out.error) { failed++; return; }
+        if (!res.ok || out.error) { failed++; console.warn('[viral]', topic, out.error); return; }
+        found += out.found || 0;
+        for (const [k, v] of Object.entries(out.dropped || {})) dropped[k] = (dropped[k] || 0) + v;
         for (const p of out.picks || []) {
           viralShown.push(p.url); shown++;
           const card = document.createElement('div'); card.className = 'vcard';
@@ -776,8 +778,9 @@
         }
       } catch { failed++; }
     }));
-    hint.textContent = shown ? `${shown} verified stories${failed ? ` (${failed} search${failed > 1 ? 'es' : ''} failed)` : ''}.`
-                             : (failed ? 'Search failed — try again.' : 'Nothing new passed the checks — try Refresh.');
+    const why = Object.entries(dropped).map(([k, v]) => `${v} ${k}`).join(', ');
+    hint.textContent = `${shown} shown of ${found} found${why ? ` — dropped: ${why}` : ''}${failed ? ` · ${failed} search${failed > 1 ? 'es' : ''} failed` : ''}.`
+      + (shown ? '' : ' Try Refresh.');
     $('viralMore').hidden = !shown;
     btn.disabled = false; btn.textContent = label;
   };
