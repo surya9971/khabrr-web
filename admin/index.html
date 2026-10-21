@@ -792,7 +792,7 @@
     try {
       const { data:{session} } = await sb.auth.getSession(); if (!session) { tab?.close(); return window.signOut(); }
       const res = await fetch(FN, { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
-        body: JSON.stringify({ action:'discover_write', password: window._pwd||'', language: $('f_language').value, url: p.url, title: p.headline }) });
+        body: JSON.stringify({ action:'discover_write', password: window._pwd||'', language: $('f_language').value, url: p.url, title: p.headline, teaser: p.teaser || '' }) });
       const out = await res.json();
       if (!res.ok || out.error) { tab?.close(); btn.textContent = out.error || `Failed (${res.status})`; return; }
       $('f_headline').value = out.headline;
