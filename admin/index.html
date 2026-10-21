@@ -212,7 +212,7 @@
         <div class="viralHead">
           <button type="button" class="i18nBtn" id="viralBtn" onclick="findViral(false)">🔥 Find viral news (last 12h)</button>
           <button type="button" class="i18nBtn" id="viralMore" onclick="findViral(true)" hidden>↻ Refresh — 4-5 new ones</button>
-          <span class="hint" id="viralHint">Searches the web for weird / viral stories from established news outlets that Khabrr doesn't have yet.</span>
+          <span class="hint" id="viralHint">2 India viral + 2 world + 1 science/tech from the live web, last 12h, legit outlets only, not already in Khabrr.</span>
         </div>
         <div id="viralList" style="display:flex;flex-direction:column;gap:10px"></div>
       </div>
@@ -741,58 +741,74 @@
   };
 
   // ── viral finder ──────────────────────────────────────────────────────────────────────────
-  // Asks admin-create-story (action:'discover') for 4-5 weird/viral stories from the last 12h on the open
-  // web -- every one verified server-side: established outlet, article loads, published <12h (24h at
-  // most), not already in Khabrr; headline+summary written from the article in the selected language.
-  // "Use this" fills the form and opens ChatGPT with an image prompt for the cover.
+  // Three small live-web searches run in parallel (admin-create-story action:'discover', one per topic:
+  // 2 India viral + 2 world-weird + 1 science/tech) and each card appears as soon as its search returns
+  // (~3-6s). Every story is checked server-side: legit outlet, article loads, recent, not already in Khabrr.
+  // "Use this" → action:'discover_write' writes headline + summary from the article in the selected
+  // language, fills the form, and opens ChatGPT with an image prompt.
   let viralShown = [];
+  const TOPIC_LABEL = { india: '🇮🇳 India viral', world: '🌍 World', science: '🔬 Science & tech' };
   window.findViral = async (more) => {
     const btn = more ? $('viralMore') : $('viralBtn'), hint = $('viralHint'), list = $('viralList');
     const { data:{session} } = await sb.auth.getSession(); if (!session) return window.signOut();
     if (!more) viralShown = [];
-    const label = btn.textContent; btn.disabled = true; btn.textContent = 'Searching the web… (~30-60s)';
-    hint.textContent = '';
-    try {
-      const res = await fetch(FN, { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
-        body: JSON.stringify({ action:'discover', password: window._pwd||'', language: $('f_language').value, exclude: viralShown }) });
-      const out = await res.json();
-      if (!res.ok || out.error) { hint.textContent = out.error || `Search failed (${res.status}).`; return; }
-      const picks = out.picks || [];
-      viralShown.push(...picks.map(p => p.url));
-      list.innerHTML = '';
-      if (!picks.length) { hint.textContent = `Nothing verified this time (${out.searched||0} found, none passed the checks) — try Refresh.`; }
-      else hint.textContent = `${picks.length} verified stories · ${out.searched} found, ${out.verified} passed the legit/fresh checks.`;
-      picks.forEach((p, i) => {
-        const card = document.createElement('div'); card.className = 'vcard';
-        const ago = p.hoursAgo < 1 ? 'under 1h ago' : `${Math.round(p.hoursAgo)}h ago`;
-        card.innerHTML = `<h4>${esc(p.headline)}</h4><p>${esc(p.summary)}</p>
-          <div class="vmeta"><b>${esc(p.outlet)}</b> · ${ago} · <a href="${esc(p.url)}" target="_blank" rel="noopener">read source ↗</a></div>
-          ${p.why ? `<div class="vwhy">${esc(p.why)}</div>` : ''}
-          <button type="button" class="i18nBtn">Use this → fill form + open ChatGPT image</button>`;
-        card.querySelector('button').onclick = () => useViral(p);
-        list.appendChild(card);
-      });
-      $('viralMore').hidden = false;
-    } catch { hint.textContent = 'Network error.'; }
-    finally { btn.disabled = false; btn.textContent = label; }
+    const label = btn.textContent; btn.disabled = true; btn.textContent = 'Searching…';
+    list.innerHTML = ''; hint.textContent = 'Searching the web — stories appear as they\'re found…';
+    let shown = 0, failed = 0;
+    const exclude = [...viralShown];
+    await Promise.all(['india', 'world', 'science'].map(async (topic) => {
+      try {
+        const res = await fetch(FN, { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
+          body: JSON.stringify({ action:'discover', topic, password: window._pwd||'', exclude }) });
+        const out = await res.json();
+        if (!res.ok || out.error) { failed++; return; }
+        for (const p of out.picks || []) {
+          viralShown.push(p.url); shown++;
+          const card = document.createElement('div'); card.className = 'vcard';
+          const ago = p.hoursAgo == null ? '' : p.hoursAgo < 1 ? ' · under 1h ago' : ` · ${Math.round(p.hoursAgo)}h ago`;
+          card.innerHTML = `<div class="vmeta">${TOPIC_LABEL[p.topic] || ''}</div><h4>${esc(p.headline)}</h4>${p.teaser ? `<p>${esc(p.teaser)}</p>` : ''}
+            <div class="vmeta"><b>${esc(p.outlet)}</b>${ago} · <a href="${esc(p.url)}" target="_blank" rel="noopener">read source ↗</a></div>
+            ${p.why ? `<div class="vwhy">${esc(p.why)}</div>` : ''}
+            <button type="button" class="i18nBtn">Use this → fill form + open ChatGPT image</button>`;
+          const b = card.querySelector('button');
+          b.onclick = () => useViral(p, b);
+          list.appendChild(card);
+        }
+      } catch { failed++; }
+    }));
+    hint.textContent = shown ? `${shown} verified stories${failed ? ` (${failed} search${failed > 1 ? 'es' : ''} failed)` : ''}.`
+                             : (failed ? 'Search failed — try again.' : 'Nothing new passed the checks — try Refresh.');
+    $('viralMore').hidden = !shown;
+    btn.disabled = false; btn.textContent = label;
   };
 
-  function useViral(p) {
-    $('f_headline').value = p.headline;
-    $('f_summary').value = p.summary;
-    $('f_source').value = p.outlet;
-    $('f_readmore').value = p.url;
-    $('f_credit').value = 'Image: AI-generated illustration';
-    window.render();
-    const prompt = `Create a cover image for this news story, for a news app card (landscape, roughly 7:6).
+  async function useViral(p, btn) {
+    // open the tab NOW (inside the click) -- browsers block window.open after an await
+    const tab = window.open('about:blank', '_blank');
+    const label = btn.textContent; btn.disabled = true; btn.textContent = 'Writing summary…';
+    try {
+      const { data:{session} } = await sb.auth.getSession(); if (!session) { tab?.close(); return window.signOut(); }
+      const res = await fetch(FN, { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
+        body: JSON.stringify({ action:'discover_write', password: window._pwd||'', language: $('f_language').value, url: p.url, title: p.headline }) });
+      const out = await res.json();
+      if (!res.ok || out.error) { tab?.close(); btn.textContent = out.error || `Failed (${res.status})`; return; }
+      $('f_headline').value = out.headline;
+      $('f_summary').value = out.summary;
+      $('f_source').value = p.outlet;
+      $('f_readmore').value = p.url;
+      $('f_credit').value = 'Image: AI-generated illustration';
+      window.render();
+      const prompt = `Create a cover image for this news story, for a news app card (landscape, roughly 7:6).
 Photorealistic editorial news-photo style, vivid and eye-catching. Do NOT put any text, words, letters, captions, logos or watermarks in the image. Do not depict any real, identifiable person.
 
-Headline: ${p.headline}
+Headline: ${out.headline}
 
-Summary: ${p.summary}`;
-    // opened synchronously inside the click, so popup blockers allow it
-    window.open('https://chatgpt.com/?q=' + encodeURIComponent(prompt), '_blank', 'noopener');
-    $('f_headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
+Summary: ${out.summary}`;
+      if (tab) { tab.opener = null; tab.location.href = 'https://chatgpt.com/?q=' + encodeURIComponent(prompt); }
+      $('f_headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      btn.textContent = '✓ Filled — image prompt opened in ChatGPT';
+    } catch { tab?.close(); btn.textContent = 'Network error — try again'; }
+    finally { btn.disabled = false; setTimeout(() => { btn.textContent = label; }, 6000); }
   }
 
   const esc = s => String(s??'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
