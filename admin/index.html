@@ -124,6 +124,17 @@
   .rov .rfill{height:100%;width:0;background:var(--accent);transition:width .2s}
   .rov .rclose{background:none;border:1px solid var(--line2);color:var(--mid);border-radius:8px;padding:8px 16px;cursor:pointer;font:inherit;font-size:13px}
   [hidden]{display:none!important}
+  /* viral finder */
+  .viral{border:1px solid var(--line2);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.02)}
+  .viralHead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .viralHead .hint{margin-left:auto}
+  .vcard{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px}
+  .vcard h4{margin:0;font-size:15px;line-height:1.35}
+  .vcard p{margin:0;font-size:13px;line-height:1.5;color:var(--soft)}
+  .vmeta{font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .vmeta a{color:inherit}
+  .vwhy{font-size:12px;color:var(--muted);font-style:italic}
+  .vcard button{align-self:flex-start}
 </style>
 </head>
 <body>
@@ -196,6 +207,14 @@
             <option value="ru">Russia (ru)</option><option value="global">World (global)</option>
           </select>
         </label>
+      </div>
+      <div class="viral">
+        <div class="viralHead">
+          <button type="button" class="i18nBtn" id="viralBtn" onclick="findViral(false)">🔥 Find viral news (last 12h)</button>
+          <button type="button" class="i18nBtn" id="viralMore" onclick="findViral(true)" hidden>↻ Refresh — 4-5 new ones</button>
+          <span class="hint" id="viralHint">Searches the web for weird / viral stories from established news outlets that Khabrr doesn't have yet.</span>
+        </div>
+        <div id="viralList" style="display:flex;flex-direction:column;gap:10px"></div>
       </div>
       <label>Headline <span id="c_headline" class="count"></span>
         <input id="f_headline" maxlength="140" placeholder="13–14 words, punchy" oninput="render()" />
@@ -720,6 +739,62 @@
     } catch (e) { list.innerHTML = `<div class="bempty">Couldn't load: ${esc(e.message||'error')}</div>`; }
     finally { btn.disabled = false; btn.textContent = 'Load bulletins'; }
   };
+
+  // ── viral finder ──────────────────────────────────────────────────────────────────────────
+  // Asks admin-create-story (action:'discover') for 4-5 weird/viral stories from the last 12h on the open
+  // web -- every one verified server-side: established outlet, article loads, published <12h (24h at
+  // most), not already in Khabrr; headline+summary written from the article in the selected language.
+  // "Use this" fills the form and opens ChatGPT with an image prompt for the cover.
+  let viralShown = [];
+  window.findViral = async (more) => {
+    const btn = more ? $('viralMore') : $('viralBtn'), hint = $('viralHint'), list = $('viralList');
+    const { data:{session} } = await sb.auth.getSession(); if (!session) return window.signOut();
+    if (!more) viralShown = [];
+    const label = btn.textContent; btn.disabled = true; btn.textContent = 'Searching the web… (~30-60s)';
+    hint.textContent = '';
+    try {
+      const res = await fetch(FN, { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
+        body: JSON.stringify({ action:'discover', password: window._pwd||'', language: $('f_language').value, exclude: viralShown }) });
+      const out = await res.json();
+      if (!res.ok || out.error) { hint.textContent = out.error || `Search failed (${res.status}).`; return; }
+      const picks = out.picks || [];
+      viralShown.push(...picks.map(p => p.url));
+      list.innerHTML = '';
+      if (!picks.length) { hint.textContent = `Nothing verified this time (${out.searched||0} found, none passed the checks) — try Refresh.`; }
+      else hint.textContent = `${picks.length} verified stories · ${out.searched} found, ${out.verified} passed the legit/fresh checks.`;
+      picks.forEach((p, i) => {
+        const card = document.createElement('div'); card.className = 'vcard';
+        const ago = p.hoursAgo < 1 ? 'under 1h ago' : `${Math.round(p.hoursAgo)}h ago`;
+        card.innerHTML = `<h4>${esc(p.headline)}</h4><p>${esc(p.summary)}</p>
+          <div class="vmeta"><b>${esc(p.outlet)}</b> · ${ago} · <a href="${esc(p.url)}" target="_blank" rel="noopener">read source ↗</a></div>
+          ${p.why ? `<div class="vwhy">${esc(p.why)}</div>` : ''}
+          <button type="button" class="i18nBtn">Use this → fill form + open ChatGPT image</button>`;
+        card.querySelector('button').onclick = () => useViral(p);
+        list.appendChild(card);
+      });
+      $('viralMore').hidden = false;
+    } catch { hint.textContent = 'Network error.'; }
+    finally { btn.disabled = false; btn.textContent = label; }
+  };
+
+  function useViral(p) {
+    $('f_headline').value = p.headline;
+    $('f_summary').value = p.summary;
+    $('f_source').value = p.outlet;
+    $('f_readmore').value = p.url;
+    $('f_credit').value = 'Image: AI-generated illustration';
+    window.render();
+    const prompt = `Create a cover image for this news story, for a news app card (landscape, roughly 7:6).
+Photorealistic editorial news-photo style, vivid and eye-catching. Do NOT put any text, words, letters, captions, logos or watermarks in the image. Do not depict any real, identifiable person.
+
+Headline: ${p.headline}
+
+Summary: ${p.summary}`;
+    // opened synchronously inside the click, so popup blockers allow it
+    window.open('https://chatgpt.com/?q=' + encodeURIComponent(prompt), '_blank', 'noopener');
+    $('f_headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
   const esc = s => String(s??'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
 
   let previewAudio;
