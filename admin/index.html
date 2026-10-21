@@ -771,7 +771,7 @@
           card.innerHTML = `<div class="vmeta">${TOPIC_LABEL[p.topic] || ''}</div><h4>${esc(p.headline)}</h4>${p.teaser ? `<p>${esc(p.teaser)}</p>` : ''}
             <div class="vmeta"><b>${esc(p.outlet)}</b>${ago} · <a href="${esc(p.url)}" target="_blank" rel="noopener">read source ↗</a></div>
             ${p.why ? `<div class="vwhy">${esc(p.why)}</div>` : ''}
-            <button type="button" class="i18nBtn">Use this → fill form + open ChatGPT image</button>`;
+            <button type="button" class="i18nBtn">Use this → fill form + find photos in ChatGPT</button>`;
           const b = card.querySelector('button');
           b.onclick = () => useViral(p, b);
           list.appendChild(card);
@@ -799,17 +799,20 @@
       $('f_summary').value = out.summary;
       $('f_source').value = p.outlet;
       $('f_readmore').value = p.url;
-      $('f_credit').value = 'Image: AI-generated illustration';
+      $('f_credit').value = '';
       window.render();
-      const prompt = `Create a cover image for this news story, for a news app card (landscape, roughly 7:6).
-Photorealistic editorial news-photo style, vivid and eye-catching. Do NOT put any text, words, letters, captions, logos or watermarks in the image. Do not depict any real, identifiable person.
+      // Real photos first: ChatGPT finds the images published with this story and lists their URLs.
+      // The admin picks one, then asks ChatGPT (same chat) to make an HD version of it.
+      const prompt = `Find the photos published with this news story — from the source article and other coverage of the same story. Show each image with its direct image URL and the page it's from. Don't create or edit any image yet.
 
 Headline: ${out.headline}
 
-Summary: ${out.summary}`;
+Summary: ${out.summary}
+
+Source article: ${p.url}`;
       if (tab) { tab.opener = null; tab.location.href = 'https://chatgpt.com/?q=' + encodeURIComponent(prompt); }
       $('f_headline').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      btn.textContent = '✓ Filled — image prompt opened in ChatGPT';
+      btn.textContent = '✓ Filled — ChatGPT is finding the story\'s photos';
     } catch { tab?.close(); btn.textContent = 'Network error — try again'; }
     finally { btn.disabled = false; setTimeout(() => { btn.textContent = label; }, 6000); }
   }
