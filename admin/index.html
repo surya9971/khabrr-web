@@ -159,7 +159,7 @@
       <button id="tab-pub" class="on" onclick="tab('pub')">✍️ Publish</button>
       <button id="tab-reel" onclick="tab('reel')">🎙 Bulletin reels</button>
     </div>
-    <div class="who"><span id="whoEmail"></span><br>session ends in <span id="timer">30:00</span></div>
+    <div class="who"><span id="whoEmail"></span><br>signed in for <span id="timer">30 days</span></div>
     <button class="out" onclick="signOut()">Sign out</button>
   </div>
 
@@ -301,13 +301,16 @@
   const SUPABASE_URL = 'https://kfbbpuujzqsqopghkpwg.supabase.co';
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtmYmJwdXVqenFzcW9wZ2hrcHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNzM5MjQsImV4cCI6MjA5MzY0OTkyNH0.KAK6Sr0DP-nBpkY9jJ-XeLfGQulHbvheUsr7hgl3ej4';
   const FN = SUPABASE_URL + '/functions/v1/admin-create-story';
-  const SESSION_MS = 30 * 60 * 1000;
+  // Stay signed in for 30 days on this browser (was 30 minutes, which meant a full Google login + password
+  // several times a day). The real locks are server-side and unchanged: admin-create-story verifies the
+  // Google session, the ADMIN_EMAILS allowlist and the publish password on every request.
+  const SESSION_MS = 30 * 24 * 60 * 60 * 1000;
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
   const $ = id => document.getElementById(id);
   const show = id => { for (const g of ['loading','signin','pwdgate','app']) $(g).hidden = (g !== id); };
 
   window.signIn  = () => sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href.split('#')[0] } });
-  window.signOut = async () => { localStorage.removeItem('kh_signin_at'); localStorage.removeItem('kh_unlocked'); await sb.auth.signOut(); location.reload(); };
+  window.signOut = async () => { for (const k of ['kh_signin_at','kh_unlocked','kh_pwd']) localStorage.removeItem(k); await sb.auth.signOut(); location.reload(); };
 
   let email = '';
   async function boot() {
@@ -318,11 +321,15 @@
     if (Date.now() - signinAt > SESSION_MS) return window.signOut();
     email = (session.user.email || '').toLowerCase();
     $('pwdEmail').textContent = email; $('whoEmail').textContent = email;
-    if (localStorage.getItem('kh_unlocked') === '1') startApp(signinAt); else show('pwdgate');
+    // The password used to live only in memory, so after any reload the page skipped this gate but sent an
+    // empty password and every publish failed with "Wrong publish password". Kept on this device now;
+    // cleared on sign-out, or when the server rejects it.
+    const saved = localStorage.getItem('kh_pwd');
+    if (saved) { window._pwd = saved; startApp(signinAt); } else show('pwdgate');
   }
   window.unlock = () => {
     if (!$('pwdInput').value) { $('pwdErr').className = 'msg err'; $('pwdErr').textContent = 'Enter the password.'; return; }
-    window._pwd = $('pwdInput').value; localStorage.setItem('kh_unlocked', '1');
+    window._pwd = $('pwdInput').value; localStorage.setItem('kh_pwd', window._pwd); localStorage.removeItem('kh_unlocked');
     startApp(Number(localStorage.getItem('kh_signin_at')));
   };
   let timerInt;
@@ -333,9 +340,9 @@
     timerInt = setInterval(() => {
       const left = SESSION_MS - (Date.now() - signinAt);
       if (left <= 0) return window.signOut();
-      const m = Math.floor(left/60000), s = Math.floor((left%60000)/1000);
-      $('timer').textContent = `${m}:${String(s).padStart(2,'0')}`;
-    }, 1000);
+      const d = Math.floor(left/86400000), h = Math.floor((left%86400000)/3600000), m = Math.floor((left%3600000)/60000);
+      $('timer').textContent = d ? `${d} day${d>1?'s':''}` : `${h}h ${m}m`;
+    }, 30000);
   }
   window.tab = (t) => {
     $('tab-pub').classList.toggle('on', t==='pub'); $('tab-reel').classList.toggle('on', t==='reel');
@@ -651,7 +658,10 @@
       if (Object.keys(incl).length) payload.translations = incl;
       const res = await fetch(FN,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`}, body: JSON.stringify(payload)});
       const out = await res.json();
-      if(!res.ok||out.error){msg.className='msg err';msg.textContent=out.error||`Failed (${res.status}).`;}
+      if(!res.ok||out.error){
+        msg.className='msg err';msg.textContent=out.error||`Failed (${res.status}).`;
+        if (/password/i.test(out.error||'')) { localStorage.removeItem('kh_pwd'); window._pwd=''; msg.textContent += ' Reload the page to enter it again.'; }
+      }
       else{
         msg.className='msg ok';
         const n = out.published ? out.published.length : 1;
