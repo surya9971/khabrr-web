@@ -741,9 +741,10 @@
   };
 
   // ── viral finder ──────────────────────────────────────────────────────────────────────────
-  // Three small live-web searches run in parallel (admin-create-story action:'discover', one per topic:
-  // 2 India viral + 2 world-weird + 1 science/tech) and each card appears as soon as its search returns
-  // (~3-6s). Every story is checked server-side: legit outlet, article loads, recent, not already in Khabrr.
+  // Three topics run in parallel (admin-create-story action:'discover', one per topic: up to 4 India viral
+  // + 3 world-weird + 3 science/tech). Each reads the outlets' trending / offbeat / science RSS feeds and a
+  // model picks the best from that list, so every link is a real article (~2-4s). Server-side: legit
+  // outlet, ≤36h old, not already in Khabrr.
   // "Use this" → action:'discover_write' writes headline + summary from the article in the selected
   // language, fills the form, and opens ChatGPT with an image prompt.
   let viralShown = [];
@@ -753,7 +754,7 @@
     const { data:{session} } = await sb.auth.getSession(); if (!session) return window.signOut();
     if (!more) viralShown = [];
     const label = btn.textContent; btn.disabled = true; btn.textContent = 'Searching…';
-    list.innerHTML = ''; hint.textContent = 'Searching the web — stories appear as they\'re found…';
+    list.innerHTML = ''; hint.textContent = 'Reading trending feeds — stories appear as they\'re found…';
     let shown = 0, failed = 0, found = 0; const dropped = {};
     const exclude = [...viralShown];
     await Promise.all(['india', 'world', 'science'].map(async (topic) => {
